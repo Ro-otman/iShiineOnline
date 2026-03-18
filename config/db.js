@@ -1,18 +1,13 @@
 ﻿import fs from "node:fs";
-
 import mysql from "mysql2/promise";
-
 import { env } from "./env.js";
-
 let pool;
-
 function buildSslConfig() {
   if (!env.DB_SSL) return undefined;
 
   const ssl = {
     rejectUnauthorized: env.DB_SSL_REJECT_UNAUTHORIZED,
   };
-
   if (env.DB_SSL_CA_PATH) {
     try {
       ssl.ca = fs.readFileSync(env.DB_SSL_CA_PATH, "utf8");
@@ -26,10 +21,8 @@ function buildSslConfig() {
       throw e;
     }
   }
-
   return ssl;
 }
-
 export function getPool() {
   if (pool) return pool;
 
@@ -44,7 +37,6 @@ export function getPool() {
     err.code = "DB_ENV_MISSING";
     throw err;
   }
-
   if (env.DB_DEBUG) {
     console.log("[db] creating MySQL pool", {
       host: env.DB_HOST,
@@ -58,7 +50,6 @@ export function getPool() {
       connectionLimit: env.DB_CONNECTION_LIMIT,
     });
   }
-
   pool = mysql.createPool({
     host: env.DB_HOST,
     port: env.DB_PORT,
@@ -75,7 +66,6 @@ export function getPool() {
 
   return pool;
 }
-
 export async function execute(sql, params) {
   try {
     const [rows] = await getPool().execute(sql, params);
@@ -95,7 +85,6 @@ export async function execute(sql, params) {
     throw err;
   }
 }
-
 export async function query(sql, params) {
   try {
     const [rows] = await getPool().query(sql, params);
@@ -111,7 +100,6 @@ export async function query(sql, params) {
         database: env.DB_NAME,
       });
     }
-
     throw err;
   }
 }
