@@ -1,9 +1,12 @@
-import { getClasseByName } from '../models/classes.model.js';
-import { getLatestLigueSettings } from '../models/ligueSettings.model.js';
-import { listMatieresForClasseAndType } from '../models/matieres.model.js';
-import { listPresence } from '../models/liguePresence.model.js';
-import { getSerieByIdOrName, listSeriesForClasse } from '../models/series.model.js';
-import { buildSchedule } from '../services/ligueSchedule.service.js';
+import { getClasseByName } from "../models/classes.model.js";
+import { getLatestLigueSettings } from "../models/ligueSettings.model.js";
+import { listMatieresForClasseAndType } from "../models/matieres.model.js";
+import { listPresence } from "../models/liguePresence.model.js";
+import {
+  getSerieByIdOrName,
+  listSeriesForClasse,
+} from "../models/series.model.js";
+import { buildSchedule } from "../services/ligueSchedule.service.js";
 
 function toISO(value) {
   if (!value) return null;
@@ -12,23 +15,25 @@ function toISO(value) {
 }
 
 function compositeRoomKey(roomId, classe) {
-  const safeRoomId = String(roomId ?? '').trim();
-  const safeClasse = String(classe ?? '').trim();
-  if (!safeRoomId) return '';
+  const safeRoomId = String(roomId ?? "").trim();
+  const safeClasse = String(classe ?? "").trim();
+  if (!safeRoomId) return "";
   if (!safeClasse) return safeRoomId;
   return `${safeClasse}::${safeRoomId}`;
 }
 
 export async function getRooms(req, res, next) {
   try {
-    const classe = String(req.query?.classe ?? '').trim();
+    const classe = String(req.query?.classe ?? "").trim();
     if (!classe) {
       return res.status(400).json({
         ok: false,
-        error: { code: 'BAD_REQUEST', message: 'Parametre "classe" requis (ex: ?classe=Tle)' },
+        error: {
+          code: "BAD_REQUEST",
+          message: 'Parametre "classe" requis (ex: ?classe=Tle)',
+        },
       });
     }
-
     const rooms = await listSeriesForClasse(classe);
 
     return res.json({
@@ -43,50 +48,72 @@ export async function getRooms(req, res, next) {
 
 export async function getSubjects(req, res, next) {
   try {
-    const roomId = String(req.params?.roomId ?? '').trim();
-    const classe = String(req.query?.classe ?? '').trim();
+    const roomId = String(req.params?.roomId ?? "").trim();
+    const classe = String(req.query?.classe ?? "").trim();
 
     if (!roomId) {
       return res.status(400).json({
         ok: false,
-        error: { code: 'BAD_REQUEST', message: 'roomId requis' },
+        error: { code: "BAD_REQUEST", message: "roomId requis" },
       });
     }
 
     if (!classe) {
       return res.status(400).json({
         ok: false,
-        error: { code: 'BAD_REQUEST', message: 'Parametre "classe" requis (ex: ?classe=Tle)' },
+        error: {
+          code: "BAD_REQUEST",
+          message: 'Parametre "classe" requis (ex: ?classe=Tle)',
+        },
       });
     }
 
     const room = await getSerieByIdOrName(roomId);
     if (!room) {
-      return res.status(404).json({ ok: false, error: { code: 'NOT_FOUND', message: 'Salle introuvable' } });
+      return res
+        .status(404)
+        .json({
+          ok: false,
+          error: { code: "NOT_FOUND", message: "Salle introuvable" },
+        });
     }
 
     const classRow = await getClasseByName(classe);
     if (!classRow) {
-      return res.status(404).json({ ok: false, error: { code: 'NOT_FOUND', message: 'Classe introuvable' } });
+      return res
+        .status(404)
+        .json({
+          ok: false,
+          error: { code: "NOT_FOUND", message: "Classe introuvable" },
+        });
     }
 
-    const settings = await getLatestLigueSettings({ id_classe: classRow.id_classe, id_type: room.id_type });
+    const settings = await getLatestLigueSettings({
+      id_classe: classRow.id_classe,
+      id_type: room.id_type,
+    });
     if (!settings) {
       return res.status(409).json({
         ok: false,
         error: {
-          code: 'LIGUE_NOT_CONFIGURED',
-          message: "La ligue n'est pas encore configuree par l'administrateur pour cette classe/serie.",
+          code: "LIGUE_NOT_CONFIGURED",
+          message:
+            "La ligue n'est pas encore configuree par l'administrateur pour cette classe/serie.",
         },
       });
     }
 
     const configuredStartBase =
-      settings.starts_at instanceof Date ? settings.starts_at : new Date(settings.starts_at);
+      settings.starts_at instanceof Date
+        ? settings.starts_at
+        : new Date(settings.starts_at);
     if (Number.isNaN(configuredStartBase.getTime())) {
       return res.status(500).json({
         ok: false,
-        error: { code: 'LIGUE_BAD_CONFIG', message: 'starts_at invalide dans ligue_settings' },
+        error: {
+          code: "LIGUE_BAD_CONFIG",
+          message: "starts_at invalide dans ligue_settings",
+        },
       });
     }
 
@@ -95,7 +122,10 @@ export async function getSubjects(req, res, next) {
     const marginSeconds = Number(settings.margin_seconds);
     const breakSeconds = Number(settings.break_seconds);
 
-    const subjects = await listMatieresForClasseAndType({ id_classe: classRow.id_classe, id_type: room.id_type });
+    const subjects = await listMatieresForClasseAndType({
+      id_classe: classRow.id_classe,
+      id_type: room.id_type,
+    });
 
     const schedule = buildSchedule({
       startBase: configuredStartBase,
@@ -127,8 +157,8 @@ export async function getSubjects(req, res, next) {
 }
 
 export function listParticipants(req, res) {
-  const roomId = String(req.params?.roomId ?? '').trim();
-  const classe = String(req.query?.classe ?? '').trim();
+  const roomId = String(req.params?.roomId ?? "").trim();
+  const classe = String(req.query?.classe ?? "").trim();
   const participants = listPresence(compositeRoomKey(roomId, classe));
 
   return res.json({

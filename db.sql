@@ -8,6 +8,10 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS ligue_challenge_comments;
+DROP TABLE IF EXISTS ligue_challenge_likes;
+DROP TABLE IF EXISTS ligue_challenge_submissions;
+DROP TABLE IF EXISTS ligue_challenges;
 DROP TABLE IF EXISTS ligue_run_answers;
 DROP TABLE IF EXISTS ligue_run_questions;
 DROP TABLE IF EXISTS ligue_runs;
@@ -562,6 +566,175 @@ CREATE TABLE ligue_profiles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+
+-- Ligue (défis)
+CREATE TABLE ligue_challenges (
+  id_challenge INT AUTO_INCREMENT PRIMARY KEY,
+  week_key VARCHAR(32) NOT NULL,
+  title VARCHAR(160) NOT NULL,
+  prompt TEXT NOT NULL,
+  subject VARCHAR(80) NOT NULL,
+  difficulty VARCHAR(32) NOT NULL,
+  author_name VARCHAR(80) NOT NULL DEFAULT 'iShiine',
+  author_verified_blue TINYINT(1) NOT NULL DEFAULT 1,
+  reward_points INT NOT NULL DEFAULT 0,
+  base_participants INT NOT NULL DEFAULT 0,
+  estimated_minutes INT NOT NULL DEFAULT 5,
+  deadline_at DATETIME NOT NULL,
+  featured TINYINT(1) NOT NULL DEFAULT 0,
+  sort_order INT NOT NULL DEFAULT 0,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_ligue_challenges_week (week_key, featured, sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE ligue_challenge_comments (
+  id_comment INT AUTO_INCREMENT PRIMARY KEY,
+  id_challenge INT NOT NULL,
+  id_user VARCHAR(255) NULL,
+  author_name VARCHAR(120) NOT NULL,
+  verified_blue TINYINT(1) NOT NULL DEFAULT 0,
+  text TEXT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_ligue_challenge_comments_challenge (id_challenge, created_at),
+  CONSTRAINT fk_ligue_challenge_comments_challenge FOREIGN KEY (id_challenge)
+    REFERENCES ligue_challenges(id_challenge)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_ligue_challenge_comments_user FOREIGN KEY (id_user)
+    REFERENCES users(id_users)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE ligue_challenge_likes (
+  id_challenge INT NOT NULL,
+  id_user VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_challenge, id_user),
+  KEY idx_ligue_challenge_likes_user (id_user),
+  CONSTRAINT fk_ligue_challenge_likes_challenge FOREIGN KEY (id_challenge)
+    REFERENCES ligue_challenges(id_challenge)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_ligue_challenge_likes_user FOREIGN KEY (id_user)
+    REFERENCES users(id_users)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE ligue_challenge_submissions (
+  id_submission INT AUTO_INCREMENT PRIMARY KEY,
+  id_challenge INT NOT NULL,
+  id_user VARCHAR(255) NOT NULL,
+  week_key VARCHAR(32) NOT NULL,
+  answer_text TEXT NOT NULL,
+  status VARCHAR(24) NOT NULL DEFAULT 'draft',
+  completed_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_ligue_challenge_submission (id_challenge, id_user, week_key),
+  KEY idx_ligue_challenge_submissions_user_week (id_user, week_key),
+  CONSTRAINT fk_ligue_challenge_submissions_challenge FOREIGN KEY (id_challenge)
+    REFERENCES ligue_challenges(id_challenge)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_ligue_challenge_submissions_user FOREIGN KEY (id_user)
+    REFERENCES users(id_users)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO ligue_challenges (
+  week_key,
+  title,
+  prompt,
+  subject,
+  difficulty,
+  author_name,
+  author_verified_blue,
+  reward_points,
+  base_participants,
+  estimated_minutes,
+  deadline_at,
+  featured,
+  sort_order,
+  is_active
+)
+VALUES
+(
+  DATE_FORMAT(DATE_SUB(UTC_DATE(), INTERVAL WEEKDAY(UTC_DATE()) DAY), '%Y-%m-%d'),
+  'Défi vedette de la semaine',
+  'Simplifie (3x - 6) / 3, puis donne la forme la plus simple et explique chaque étape comme si tu aidais un camarade.',
+  'Maths',
+  'Moyen',
+  'iShiine',
+  1,
+  45,
+  182,
+  6,
+  DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 DAY),
+  1,
+  1,
+  1
+),
+(
+  DATE_FORMAT(DATE_SUB(UTC_DATE(), INTERVAL WEEKDAY(UTC_DATE()) DAY), '%Y-%m-%d'),
+  'Chrono physique',
+  'Un mobile parcourt 150 m en 12 s. Calcule la vitesse moyenne, puis convertis-la en km/h.',
+  'Physique',
+  'Facile',
+  'iShiine',
+  1,
+  30,
+  136,
+  5,
+  DATE_ADD(UTC_TIMESTAMP(), INTERVAL 3 DAY),
+  0,
+  2,
+  1
+);
+
+INSERT INTO ligue_challenge_comments (
+  id_challenge,
+  id_user,
+  author_name,
+  verified_blue,
+  text,
+  created_at
+)
+SELECT
+  c.id_challenge,
+  NULL,
+  'Socrate',
+  1,
+  'Commence par mettre 3 en facteur au numérateur.',
+  UTC_TIMESTAMP()
+FROM ligue_challenges c
+WHERE c.title = 'Défi vedette de la semaine'
+  AND c.week_key = DATE_FORMAT(DATE_SUB(UTC_DATE(), INTERVAL WEEKDAY(UTC_DATE()) DAY), '%Y-%m-%d')
+LIMIT 1;
+
+INSERT INTO ligue_challenge_comments (
+  id_challenge,
+  id_user,
+  author_name,
+  verified_blue,
+  text,
+  created_at
+)
+SELECT
+  c.id_challenge,
+  NULL,
+  'Einstein',
+  1,
+  'La première étape est la formule v = d / t.',
+  UTC_TIMESTAMP()
+FROM ligue_challenges c
+WHERE c.title = 'Chrono physique'
+  AND c.week_key = DATE_FORMAT(DATE_SUB(UTC_DATE(), INTERVAL WEEKDAY(UTC_DATE()) DAY), '%Y-%m-%d')
+LIMIT 1;
 -- Ligue (live) - runs/results
 CREATE TABLE ligue_runs (
   id_run CHAR(36) PRIMARY KEY,
@@ -648,4 +821,5 @@ CREATE TABLE ligue_run_answers (
     ON DELETE SET NULL
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
