@@ -1,4 +1,4 @@
-﻿import { execute } from '../config/db.js';
+import { execute } from '../config/db.js';
 
 function inPlaceholders(list) {
   return list.map(() => '?').join(',');
@@ -54,7 +54,7 @@ export async function listOptionsByQuizIds(quizIds) {
   const placeholders = inPlaceholders(quizIds);
   return execute(
     `
-      SELECT id_options, opt_text, id_quiz
+      SELECT id_options, opt_text, id_quiz, is_correct
       FROM \`options\`
       WHERE id_quiz IN (${placeholders})
       ORDER BY id_quiz ASC, id_options ASC
@@ -98,7 +98,8 @@ export async function getLigueQuizPayloadByIds(quizIds) {
 
     optionsByQuizId.get(quizId).push({
       id_options: Number(row.id_options),
-      opt_text: row.opt_text
+      opt_text: row.opt_text,
+      is_correct: Number(row.is_correct) === 1 ? 1 : 0,
     });
   }
 
