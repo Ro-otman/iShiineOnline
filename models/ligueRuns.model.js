@@ -142,7 +142,8 @@ export async function getLigueLeaderboard({ week_key, id_classe, id_serie, limit
         SUM(lr.total_questions) AS questions_total,
         SUM(lr.total_response_time_ms) AS time_total,
         COUNT(*) AS subjects_played,
-        (SUM(lr.correct_count) / NULLIF(SUM(lr.total_questions), 0)) * 100 AS score_percent
+        (SUM(lr.correct_count) / NULLIF(SUM(lr.total_questions), 0)) * 100 AS score_percent,
+        (SUM(lr.correct_count) / NULLIF(SUM(lr.total_questions), 0)) * 20 AS average_on_20
       FROM ligue_runs lr
       JOIN users u ON u.id_users = lr.id_user
       WHERE lr.week_key = ?
@@ -150,7 +151,7 @@ export async function getLigueLeaderboard({ week_key, id_classe, id_serie, limit
         AND lr.id_serie = ?
         AND lr.submitted_at IS NOT NULL
       GROUP BY lr.id_user, u.nom, u.prenoms, u.img_path
-      ORDER BY score_percent DESC, time_total ASC
+      ORDER BY average_on_20 DESC, time_total ASC
       LIMIT ?
     `,
     [week_key, id_classe, id_serie, safeLimit],
@@ -166,6 +167,8 @@ export async function getLigueLeaderboard({ week_key, id_classe, id_serie, limit
     questions_total: Number(r.questions_total ?? 0),
     time_total: Number(r.time_total ?? 0),
     subjects_played: Number(r.subjects_played ?? 0),
-    score_percent: Number(r.score_percent ?? 0)
+    score_percent: Number(r.score_percent ?? 0),
+    average_on_20: Number(r.average_on_20 ?? 0)
   }));
 }
+
