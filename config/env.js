@@ -1,4 +1,4 @@
-﻿import path from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import dotenv from "dotenv";
@@ -59,4 +59,12 @@ export const env = {
   ADMIN_COOKIE_SECURE: toBool(process.env.ADMIN_COOKIE_SECURE, process.env.NODE_ENV === 'production'),
   ADMIN_COOKIE_DOMAIN: process.env.ADMIN_COOKIE_DOMAIN || '',
   APP_TIMEZONE: process.env.APP_TIMEZONE || 'Africa/Porto-Novo',
+
+  // Firebase push
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
+  FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY || '',
+  FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
+  FIREBASE_SERVICE_ACCOUNT_BASE64: process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 || '',
+  FIREBASE_SERVICE_ACCOUNT_PATH: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
 };

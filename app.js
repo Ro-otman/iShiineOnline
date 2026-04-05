@@ -1,4 +1,4 @@
-﻿import "dotenv/config";
+import "dotenv/config";
 
 import { createServer } from "node:http";
 import fs from "node:fs/promises";
@@ -17,7 +17,9 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import { notFound } from "./middlewares/notFound.js";
 import adminRouter from "./routes/admin.routes.js";
 import routes from "./routes/index.js";
+import { setRealtimeServer } from "./services/realtimeGateway.service.js";
 import { registerLigueSockets } from "./sockets/ligue.socket.js";
+import { registerNotificationSockets } from "./sockets/notification.socket.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,7 +75,9 @@ async function start() {
     },
   });
 
+  setRealtimeServer(io);
   registerLigueSockets(io);
+  registerNotificationSockets(io);
 
   httpServer.listen(env.PORT, "0.0.0.0", async () => {
     console.log(

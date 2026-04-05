@@ -79,7 +79,11 @@ export async function getSubjects(req, res, next) {
       });
     }
 
-    const context = await resolveLigueRoomContext({ roomId, classe });
+    const context = await resolveLigueRoomContext({
+      roomId,
+      classe,
+      requestedWeekKey: weekKey,
+    });
     const averageSecondsPerQuestion = computeAverageSecondsPerQuestion(
       context.subjectPlans,
     );
@@ -120,3 +124,4 @@ export function listParticipants(req, res) {
     participants,
   });
 }
+

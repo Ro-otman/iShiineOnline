@@ -112,7 +112,7 @@ async function buildPlanForCycle({
   };
 }
 
-export async function resolveLigueRoomContext({ roomId, classe, now = new Date() }) {
+export async function resolveLigueRoomContext({ roomId, classe, now = new Date(), requestedWeekKey = '' }) {
   const room = await getSerieByIdOrName(roomId);
   if (!room) {
     const err = new Error('Salle introuvable');
@@ -158,19 +158,33 @@ export async function resolveLigueRoomContext({ roomId, classe, now = new Date()
   });
 
   const currentCycleEndMs = Date.parse(currentPlan.schedule.cycleEndAt);
+  const safeRequestedWeekKey = String(requestedWeekKey ?? '').trim();
+  const nextStart = nextWeeklyOccurrence(latestStart);
+  const nextWeekKey = weekKeyFromDateUtc(nextStart) ?? weekKeyFromDateUtc(new Date(latestStart.getTime() + WEEK_MS)) ?? latestWeekKey;
+
+  let nextPlanPromise = null;
+  const loadNextPlan = async () => {
+    if (!nextPlanPromise) {
+      nextPlanPromise = buildPlanForCycle({
+        cycleStart: nextStart,
+        weekKey: nextWeekKey,
+        room,
+        classRow,
+        questionsPerSubject,
+        marginSeconds,
+        breakSeconds,
+      });
+    }
+    return nextPlanPromise;
+  };
+
   let selectedPlan = currentPlan;
-  if (Number.isFinite(currentCycleEndMs) && currentCycleEndMs <= new Date(now).getTime()) {
-    const nextStart = nextWeeklyOccurrence(latestStart);
-    const nextWeekKey = weekKeyFromDateUtc(nextStart) ?? weekKeyFromDateUtc(new Date(latestStart.getTime() + WEEK_MS)) ?? latestWeekKey;
-    selectedPlan = await buildPlanForCycle({
-      cycleStart: nextStart,
-      weekKey: nextWeekKey,
-      room,
-      classRow,
-      questionsPerSubject,
-      marginSeconds,
-      breakSeconds,
-    });
+  if (safeRequestedWeekKey) {
+    if (safeRequestedWeekKey === nextWeekKey) {
+      selectedPlan = await loadNextPlan();
+    }
+  } else if (Number.isFinite(currentCycleEndMs) && currentCycleEndMs <= new Date(now).getTime()) {
+    selectedPlan = await loadNextPlan();
   }
 
   const subjectPlansByMatiereId = new Map(
@@ -193,3 +207,4 @@ export async function resolveLigueRoomContext({ roomId, classe, now = new Date()
     weeklyQuizBank: selectedPlan.bankRows,
   };
 }
+
