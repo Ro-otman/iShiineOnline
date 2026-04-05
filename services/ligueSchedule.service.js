@@ -86,8 +86,7 @@ export function computeQuestionWindow({
   let cursorMs = slotStartMs;
   for (let index = 0; index < timers.length; index += 1) {
     const timerSeconds = timers[index];
-    const isLast = index >= timers.length - 1;
-    const questionEndMs = isLast ? runEndMs : cursorMs + timerSeconds * 1000;
+    const questionEndMs = cursorMs + timerSeconds * 1000;
 
     if (nowMs < questionEndMs) {
       return {
@@ -101,7 +100,7 @@ export function computeQuestionWindow({
       };
     }
 
-    cursorMs += timerSeconds * 1000;
+    cursorMs = questionEndMs;
   }
 
   return null;
@@ -187,3 +186,4 @@ export function buildSchedule({
     status,
   };
 }
+
