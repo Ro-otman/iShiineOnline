@@ -1,109 +1,349 @@
 ﻿<%- include('partials/layout-start') %>
 
-<section class="hero-band panel playful-hero">
-  <div>
-    <p class="eyebrow">Vue rapide</p>
-    <h3>Ton application grandit, et ton tableau de bord doit respirer.</h3>
-    <p>Ici, on se concentre sur l essentiel: utilisateurs, abonnements, contenu et rythme d apprentissage.</p>
+<% const pm = data.paymentMetrics || {}; %>
+
+<section class="hero-band global-hero">
+  <div class="hero-copy hero-copy-featured">
+    <div class="hero-copy-head">
+      <span class="hero-emblem"><i class="bx bxs-dashboard"></i></span>
+      <div>
+        <p class="eyebrow">Vue d’ensemble</p>
+        <h3>Suivi global d’iShiine</h3>
+      </div>
+    </div>
+    <p class="hero-summary">Utilisateurs, revenus, contenu et activité récente.</p>
+    <div class="hero-mini-points">
+      <span class="hero-mini-pill"><i class="bx bx-user"></i> Utilisateurs</span>
+      <span class="hero-mini-pill"><i class="bx bx-wallet-alt"></i> Revenus</span>
+      <span class="hero-mini-pill"><i class="bx bx-book-open"></i> Contenu</span>
+      <span class="hero-mini-pill"><i class="bx bx-pulse"></i> Activité</span>
+    </div>
   </div>
-  <div class="hero-badges">
-    <span class="soft-badge">Moyenne quiz: <%= data.metrics.averageScore %>%</span>
-    <span class="soft-badge">Programmes: <%= helpers.number(data.metrics.totalProgrammes) %></span>
+
+  <div class="hero-highlight">
+    <div class="hero-score">
+      <span>Chiffre d’affaires confirmé</span>
+      <strong><%= helpers.money(pm.grossRevenue || 0) %> F CFA</strong>
+      <small><%= helpers.number(pm.successfulPayments || 0) %> paiement(s) validé(s)</small>
+    </div>
+    <div class="hero-badges">
+      <span class="soft-badge"><i class="bx bx-wallet"></i> Mois en cours <%= helpers.money(pm.monthRevenue || 0) %> F CFA</span>
+      <span class="soft-badge"><i class="bx bx-transfer-alt"></i> Déjà transféré <%= helpers.money(pm.transferredRevenue || 0) %> F CFA</span>
+      <span class="soft-badge"><i class="bx bx-line-chart"></i> Score moyen <%= data.metrics.averageScore %>%</span>
+    </div>
   </div>
 </section>
 
-<section class="metric-grid metric-grid-4">
-  <article class="metric-card panel">
-    <span class="metric-label">Utilisateurs</span>
-    <strong class="metric-value"><%= helpers.number(data.metrics.totalUsers) %></strong>
-    <span class="metric-help">Tous les comptes enregistres</span>
+<section class="metric-grid metric-grid-6 dashboard-metrics">
+  <article class="metric-card panel metric-with-icon">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-sky"><i class="bx bxs-user"></i></div>
+      <span class="metric-label">Utilisateurs</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.number(data.metrics.totalUsers) %></strong>
+      <span class="metric-help">Comptes créés</span>
+    </div>
   </article>
-  <article class="metric-card panel accent-sky">
-    <span class="metric-label">Abonnes actifs</span>
-    <strong class="metric-value"><%= helpers.number(data.metrics.activeSubscribers) %></strong>
-    <span class="metric-help">Acces premium encore valides</span>
+
+  <article class="metric-card panel metric-with-icon accent-sky">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-blue"><i class="bx bxs-badge-check"></i></div>
+      <span class="metric-label">Abonnés actifs</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.number(data.metrics.activeSubscribers) %></strong>
+      <span class="metric-help">Premium en cours</span>
+    </div>
   </article>
-  <article class="metric-card panel accent-gold">
-    <span class="metric-label">Quiz publies</span>
-    <strong class="metric-value"><%= helpers.number(data.metrics.totalQuiz) %></strong>
-    <span class="metric-help"><%= helpers.number(data.metrics.totalSa) %> chapitres couverts</span>
+
+  <article class="metric-card panel metric-with-icon accent-gold">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-gold"><i class="bx bxs-bank"></i></div>
+      <span class="metric-label">CA confirmé</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.money(pm.grossRevenue || 0) %></strong>
+      <span class="metric-help">Paiements approuvés ou transférés</span>
+    </div>
   </article>
-  <article class="metric-card panel accent-coral">
-    <span class="metric-label">Tentatives</span>
-    <strong class="metric-value"><%= helpers.number(data.metrics.totalAttempts) %></strong>
-    <span class="metric-help">Engagement global des apprenants</span>
+
+  <article class="metric-card panel metric-with-icon accent-coral">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-coral"><i class="bx bxs-calendar-star"></i></div>
+      <span class="metric-label">CA du mois</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.money(pm.monthRevenue || 0) %></strong>
+      <span class="metric-help">Lecture mensuelle</span>
+    </div>
+  </article>
+
+  <article class="metric-card panel metric-with-icon accent-mint">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-mint"><i class="bx bxs-book-content"></i></div>
+      <span class="metric-label">Quiz publiés</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.number(data.metrics.totalQuiz) %></strong>
+      <span class="metric-help"><%= helpers.number(data.metrics.totalSa) %> SA et <%= helpers.number(data.metrics.totalProgrammes) %> programmes</span>
+    </div>
+  </article>
+
+  <article class="metric-card panel metric-with-icon accent-violet">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-violet"><i class="bx bxs-edit-alt"></i></div>
+      <span class="metric-label">Tentatives</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.number(data.metrics.totalAttempts) %></strong>
+      <span class="metric-help">Activité globale des apprenants</span>
+    </div>
   </article>
 </section>
 
-<section class="content-grid-2">
-  <article class="panel">
+<section class="content-grid-2 dashboard-grid">
+  <article class="panel spotlight-panel">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Nouveaux comptes</p>
-        <h3>Dernieres inscriptions</h3>
+        <p class="eyebrow">Monétisation</p>
+        <h3>État du premium</h3>
       </div>
-      <a class="ghost-link" href="/admin/users">Voir tout</a>
+      <a class="ghost-link" href="/admin/payments">Ouvrir le journal</a>
     </div>
-    <div class="stack-list">
-      <% if (!data.recentUsers.length) { %><p class="empty-copy">Aucun utilisateur pour le moment.</p><% } %>
-      <% data.recentUsers.forEach((user) => { %>
-        <article class="list-card">
-          <div>
-            <strong><%= `${user.prenoms} ${user.nom}` %></strong>
-            <small><%= user.email || user.phone || 'Contact non renseigne' %></small>
+
+    <div class="spotlight-grid">
+      <article class="spotlight-card spotlight-card-strong">
+        <span class="spotlight-icon"><i class="bx bxs-credit-card-front"></i></span>
+        <div>
+          <strong><%= helpers.number(pm.totalPayments || 0) %> transaction(s)</strong>
+          <p>Vue rapide du flux de paiements.</p>
+        </div>
+      </article>
+
+      <article class="spotlight-card">
+        <span class="spotlight-icon"><i class="bx bx-loader-circle"></i></span>
+        <div>
+          <strong><%= helpers.number(pm.pendingPayments || 0) %> en attente</strong>
+          <p>Paiements à vérifier.</p>
+        </div>
+      </article>
+
+      <article class="spotlight-card">
+        <span class="spotlight-icon"><i class="bx bx-x-circle"></i></span>
+        <div>
+          <strong><%= helpers.number(pm.failedPayments || 0) %> échec(s)</strong>
+          <p>Paiements non aboutis.</p>
+        </div>
+      </article>
+    </div>
+  </article>
+
+  <article class="panel insight-panel panel-class-breakdown">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Répartition</p>
+        <h3>Classes les plus présentes</h3>
+      </div>
+    </div>
+
+    <div class="insight-grid class-breakdown-list">
+      <% data.classBreakdown.forEach((item) => { %>
+        <article class="insight-tile insight-class-tile">
+          <div class="insight-class-top">
+            <span class="insight-class-icon"><i class="bx bxs-school"></i></span>
+            <span class="insight-class-tag">Classe</span>
           </div>
-          <div class="list-meta">
-            <span class="status-pill <%= Number(user.is_subscribed) === 1 ? 'status-pill-active' : 'status-pill-idle' %>"><%= Number(user.is_subscribed) === 1 ? 'Abonne' : 'Libre' %></span>
-            <small><%= user.classe %></small>
+          <div class="insight-class-row">
+            <strong class="insight-class-name"><%= item.classe %></strong>
+            <span class="insight-class-count"><%= helpers.number(item.total) %> compte(s)</span>
           </div>
         </article>
       <% }) %>
     </div>
   </article>
+</section>
 
+<section class="content-grid-2 dashboard-grid">
   <article class="panel">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Contenu recent</p>
-        <h3>Derniers quiz crees</h3>
+        <p class="eyebrow">Paiements récents</p>
+        <h3>Dernières transactions</h3>
       </div>
-      <a class="ghost-link" href="/admin/content">Gerer le contenu</a>
+      <span class="soft-badge"><i class="bx bx-receipt"></i> <%= helpers.number(pm.totalPayments || 0) %> transaction(s)</span>
     </div>
+
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Question</th><th>Contexte</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Transaction</th>
+            <th>Utilisateur</th>
+            <th>Montant</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
         <tbody>
-          <% if (!data.recentQuizzes.length) { %><tr><td colspan="2">Aucun quiz trouve.</td></tr><% } %>
-          <% data.recentQuizzes.forEach((quiz) => { %>
+          <% if (!data.recentPayments.length) { %>
+            <tr><td colspan="4">Aucune transaction enregistrée pour le moment.</td></tr>
+          <% } %>
+          <% data.recentPayments.forEach((payment) => { %>
+            <% const displayName = `${payment.prenoms || payment.customer_firstname || ''} ${payment.nom || payment.customer_lastname || ''}`.trim() || 'Utilisateur inconnu'; %>
+            <% const displayEmail = payment.user_email || payment.customer_email || payment.customer_phone || 'Aucun contact'; %>
             <tr>
-              <td><%= quiz.question %></td>
-              <td><strong><%= `${quiz.nom_classe} / ${quiz.nom_type}` %></strong><small><%= `${quiz.nom_matiere} - ${quiz.nom_sa}` %></small></td>
+              <td>
+                <strong><%= payment.transaction_id %></strong>
+                <small><%= helpers.dateTime(payment.provider_updated_at || payment.updated_at || payment.created_at) %></small>
+              </td>
+              <td>
+                <strong><%= displayName %></strong>
+                <small><%= displayEmail %></small>
+              </td>
+              <td>
+                <strong><%= helpers.money(payment.amount) %> <%= payment.currency_iso || 'XOF' %></strong>
+              <small><%= payment.classe || 'Classe non renseignée' %></small>
+              </td>
+              <td>
+                <span class="status-pill <%= ['approved', 'transferred'].includes(String(payment.status || '').toLowerCase()) ? 'status-pill-active' : 'status-pill-idle' %>">
+                  <i class="bx <%= ['approved', 'transferred'].includes(String(payment.status || '').toLowerCase()) ? 'bx-check-shield' : 'bx-time-five' %>"></i>
+                  <%= payment.status || 'inconnu' %>
+                </span>
+              </td>
             </tr>
           <% }) %>
         </tbody>
       </table>
     </div>
   </article>
+
+  <article class="panel">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Utilisateurs récents</p>
+        <h3>Nouveaux comptes</h3>
+      </div>
+      <a class="ghost-link" href="/admin/users">Voir les comptes</a>
+    </div>
+
+    <div class="stack-list">
+      <% if (!data.recentUsers.length) { %><p class="empty-copy">Aucun utilisateur pour le moment.</p><% } %>
+      <% data.recentUsers.forEach((user) => { %>
+        <article class="list-card polished-list-card">
+          <div class="list-persona">
+            <span class="avatar-chip"><i class="bx bx-user"></i></span>
+            <div>
+              <strong><%= `${user.prenoms} ${user.nom}` %></strong>
+              <small><%= user.email || user.phone || 'Contact non renseigné' %></small>
+            </div>
+          </div>
+          <div class="list-meta">
+            <span class="status-pill <%= Number(user.is_subscribed) === 1 ? 'status-pill-active' : 'status-pill-idle' %>">
+              <i class="bx <%= Number(user.is_subscribed) === 1 ? 'bx-star' : 'bx-circle' %>"></i>
+              <%= Number(user.is_subscribed) === 1 ? 'Abonné' : 'Libre' %>
+            </span>
+            <small><%= user.classe %></small>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  </article>
 </section>
 
-<section class="content-grid-2">
-  <article class="panel">
-    <div class="section-head"><div><p class="eyebrow">Population</p><h3>Classes les plus representees</h3></div></div>
-    <div class="mini-grid">
-      <% data.classBreakdown.forEach((item) => { %>
-        <article class="mini-tile"><strong><%= item.classe %></strong><span><%= helpers.number(item.total) %> comptes</span></article>
+<section class="content-grid-2 dashboard-grid">
+  <article class="panel panel-subscriptions">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Activation premium</p>
+        <h3>Derniers abonnements actifs</h3>
+      </div>
+    </div>
+
+    <div class="stack-list subscriptions-list">
+      <% if (!data.recentSubscriptions.length) { %><p class="empty-copy">Aucune activation enregistrée.</p><% } %>
+      <% data.recentSubscriptions.forEach((user) => { %>
+        <article class="list-card polished-list-card">
+          <div class="list-persona">
+            <span class="avatar-chip avatar-chip-gold"><i class="bx bxs-crown"></i></span>
+            <div>
+              <strong><%= `${user.prenoms} ${user.nom}` %></strong>
+              <small><%= user.email || 'Contact non renseigné' %></small>
+            </div>
+          </div>
+          <div class="list-meta">
+            <strong><%= user.classe || 'Classe non renseignée' %></strong>
+            <small>Fin: <%= helpers.dateTime(user.subscription_expiry) %></small>
+          </div>
+        </article>
       <% }) %>
     </div>
   </article>
 
-  <article class="panel">
-    <div class="section-head"><div><p class="eyebrow">Matieres</p><h3>Les plus riches en quiz</h3></div></div>
-    <div class="mini-grid">
-      <% data.subjectBreakdown.forEach((item) => { %>
-        <article class="mini-tile"><strong><%= item.nom_matiere %></strong><span><%= helpers.number(item.quiz_count) %> quiz</span><small><%= helpers.number(item.sa_count) %> chapitres</small></article>
+  <article class="panel panel-richness">
+    <div class="section-head section-head-richness">
+      <div>
+        <p class="eyebrow">Richesse pédagogique</p>
+        <h3 class="section-title-compact">Matières les mieux fournies</h3>
+      </div>
+      <a class="ghost-link" href="/admin/content">Aller au contenu</a>
+    </div>
+
+    <div class="insight-grid insight-grid-rich">
+      <% data.subjectBreakdown.forEach((item, index) => { %>
+        <% const rank = String(index + 1).padStart(2, '0'); %>
+        <article class="insight-tile insight-tile-rich insight-subject-tile">
+          <div class="insight-subject-main">
+            <span class="insight-subject-rank"><%= rank %></span>
+            <div class="insight-subject-copy">
+              <strong><%= item.nom_matiere %></strong>
+              <small><%= helpers.number(item.quiz_count) %> quiz disponibles</small>
+            </div>
+          </div>
+          <div class="insight-subject-meta">
+            <span class="insight-subject-pill"><i class="bx bx-layer"></i> <%= helpers.number(item.sa_count) %> SA</span>
+            <span class="insight-subject-pill insight-subject-pill-soft"><i class="bx bx-check-circle"></i> Banque prête</span>
+          </div>
+        </article>
       <% }) %>
     </div>
   </article>
+</section>
+
+<section class="panel panel-recent-quizzes">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Contenu récent</p>
+      <h3>Derniers quiz ajoutés</h3>
+    </div>
+    <a class="ghost-link" href="/admin/content">Ajouter du contenu</a>
+  </div>
+
+  <div class="recent-quiz-list">
+    <% if (!data.recentQuizzes.length) { %>
+      <p class="empty-copy">Aucun quiz trouvé.</p>
+    <% } %>
+
+    <% data.recentQuizzes.forEach((quiz) => { %>
+      <article class="recent-quiz-card">
+        <div class="recent-quiz-main">
+          <span class="recent-quiz-icon"><i class="bx bx-help-circle"></i></span>
+          <div class="recent-quiz-copy">
+            <span class="recent-quiz-label">Question</span>
+            <strong><%= quiz.question %></strong>
+          </div>
+        </div>
+
+        <div class="recent-quiz-meta">
+          <span class="recent-quiz-pill recent-quiz-pill-strong"><i class="bx bx-layer"></i> <%= `${quiz.nom_classe} / ${quiz.nom_type}` %></span>
+          <span class="recent-quiz-pill"><i class="bx bx-book-open"></i> <%= quiz.nom_matiere %></span>
+          <span class="recent-quiz-pill recent-quiz-pill-soft"><i class="bx bx-bookmark"></i> <%= quiz.nom_sa %></span>
+        </div>
+      </article>
+    <% }) %>
+  </div>
 </section>
 
 <%- include('partials/layout-end') %>
+
+
+

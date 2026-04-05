@@ -1,10 +1,7 @@
-﻿export function notFound(req, res) {
-  res.status(404).json({
-    ok: false,
-    error: {
-      code: 'NOT_FOUND',
-      message: 'Route introuvable',
-      path: req.originalUrl
-    }
-  });
+export function notFound(req, _res, next) {
+  const err = new Error('Route introuvable');
+  err.statusCode = 404;
+  err.code = 'NOT_FOUND';
+  err.details = { path: req.originalUrl };
+  next(err);
 }

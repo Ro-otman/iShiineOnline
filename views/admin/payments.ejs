@@ -1,46 +1,75 @@
 <%- include('partials/layout-start') %>
 
-<section class="metric-grid metric-grid-3">
-  <article class="metric-card panel accent-gold">
-    <span class="metric-label">CA confirme</span>
-    <strong class="metric-value"><%= helpers.money(data.paymentMetrics.grossRevenue) %> F CFA</strong>
-    <span class="metric-help">Transactions approuvees ou transferees enregistrees localement</span>
-  </article>
-  <article class="metric-card panel accent-sky">
-    <span class="metric-label">Montant transfere</span>
-    <strong class="metric-value"><%= helpers.money(data.paymentMetrics.transferredRevenue) %> F CFA</strong>
-    <span class="metric-help">Part deja transferee sur la balance FedaPay</span>
-  </article>
-  <article class="metric-card panel accent-coral">
-    <span class="metric-label">CA du mois</span>
-    <strong class="metric-value"><%= helpers.money(data.paymentMetrics.monthRevenue) %> F CFA</strong>
-    <span class="metric-help">Calcule sur les paiements reellement journalises</span>
-  </article>
+<section class="hero-band payments-hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Journal détaillé</p>
+    <h3>Suivi des paiements FedaPay</h3>
+  </div>
+
+  <div class="hero-badges">
+    <span class="soft-badge"><i class="bx bx-check-double"></i> <%= helpers.number(data.paymentMetrics.successfulPayments) %> validé(s)</span>
+    <span class="soft-badge"><i class="bx bx-loader-circle"></i> <%= helpers.number(data.paymentMetrics.pendingPayments) %> en attente</span>
+    <span class="soft-badge"><i class="bx bx-transfer"></i> <%= helpers.money(data.paymentMetrics.transferredRevenue) %> F CFA transférés</span>
+  </div>
 </section>
 
-<section class="hero-band panel payments-hero">
-  <div>
-    <p class="eyebrow">Etat actuel</p>
-    <h3>Le dashboard lit maintenant un historique local des transactions FedaPay.</h3>
-    <p>Les chiffres affiches ici viennent de la table <code>payments</code>, alimentee par l init du checkout, la verification backend et le webhook.</p>
-  </div>
-  <div class="hero-badges">
-    <span class="soft-badge">Paiements valides: <%= helpers.number(data.paymentMetrics.successfulPayments) %></span>
-    <span class="soft-badge">En attente: <%= helpers.number(data.paymentMetrics.pendingPayments) %></span>
-    <span class="soft-badge">Echecs: <%= helpers.number(data.paymentMetrics.failedPayments) %></span>
-  </div>
+<section class="metric-grid metric-grid-4">
+  <article class="metric-card panel metric-with-icon accent-gold">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-gold"><i class="bx bxs-bank"></i></div>
+      <span class="metric-label">CA confirmé</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.money(data.paymentMetrics.grossRevenue) %></strong>
+      <span class="metric-help">Transactions approuvées ou transférées</span>
+    </div>
+  </article>
+
+  <article class="metric-card panel metric-with-icon accent-sky">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-blue"><i class="bx bx-transfer-alt"></i></div>
+      <span class="metric-label">Montant transféré</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.money(data.paymentMetrics.transferredRevenue) %></strong>
+      <span class="metric-help">Versé sur la balance FedaPay</span>
+    </div>
+  </article>
+
+  <article class="metric-card panel metric-with-icon accent-coral">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-coral"><i class="bx bx-calendar-event"></i></div>
+      <span class="metric-label">CA du mois</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.money(data.paymentMetrics.monthRevenue) %></strong>
+      <span class="metric-help">Mois courant</span>
+    </div>
+  </article>
+
+  <article class="metric-card panel metric-with-icon accent-mint">
+    <div class="metric-topline">
+      <div class="metric-icon metric-icon-mint"><i class="bx bxs-credit-card-front"></i></div>
+      <span class="metric-label">Transactions</span>
+    </div>
+    <div class="metric-body">
+      <strong class="metric-value"><%= helpers.number(data.paymentMetrics.totalPayments) %></strong>
+      <span class="metric-help">Journal du backend</span>
+    </div>
+  </article>
 </section>
 
 <section class="content-grid-2 payments-layout">
-  <article class="panel wide-panel">
+  <article class="panel wide-panel panel-payments-table">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Transactions recentes</p>
-        <h3>Derniers paiements FedaPay</h3>
+        <p class="eyebrow">Flux récents</p>
+        <h3>Derniers paiements</h3>
       </div>
-      <span class="soft-badge"><%= helpers.number(data.paymentMetrics.totalPayments) %> transaction(s)</span>
+      <span class="soft-badge"><i class="bx bx-receipt"></i> <%= helpers.number(data.paymentMetrics.totalPayments) %> transaction(s)</span>
     </div>
-    <div class="table-wrap">
+
+    <div class="table-wrap payments-table-wrap">
       <table>
         <thead>
           <tr>
@@ -53,11 +82,11 @@
         </thead>
         <tbody>
           <% if (!data.recentPayments.length) { %>
-            <tr><td colspan="5">Aucune transaction enregistree pour le moment.</td></tr>
+            <tr><td colspan="5">Aucune transaction enregistrée pour le moment.</td></tr>
           <% } %>
           <% data.recentPayments.forEach((payment) => { %>
             <% const displayName = `${payment.prenoms || payment.customer_firstname || ''} ${payment.nom || payment.customer_lastname || ''}`.trim() || 'Utilisateur inconnu'; %>
-            <% const displayEmail = payment.user_email || payment.customer_email || ''; %>
+            <% const displayEmail = payment.user_email || payment.customer_email || payment.customer_phone || 'Aucun contact'; %>
             <% const updatedAt = payment.provider_updated_at || payment.updated_at || payment.created_at; %>
             <tr>
               <td>
@@ -66,14 +95,17 @@
               </td>
               <td>
                 <strong><%= displayName %></strong>
-                <small><%= displayEmail || payment.customer_phone || 'Aucun contact' %></small>
+                <small><%= displayEmail %></small>
               </td>
               <td>
                 <strong><%= helpers.money(payment.amount) %> <%= payment.currency_iso || 'XOF' %></strong>
-                <small><%= payment.classe || 'Classe non renseignee' %></small>
+                <small><%= payment.classe || 'Classe non renseignée' %></small>
               </td>
               <td>
-                <span class="status-pill <%= ['approved', 'transferred'].includes(String(payment.status || '').toLowerCase()) ? 'status-pill-active' : 'status-pill-idle' %>"><%= payment.status || 'inconnu' %></span>
+                <span class="status-pill <%= ['approved', 'transferred'].includes(String(payment.status || '').toLowerCase()) ? 'status-pill-active' : 'status-pill-idle' %>">
+                  <i class="bx <%= ['approved', 'transferred'].includes(String(payment.status || '').toLowerCase()) ? 'bx-check-shield' : 'bx-time-five' %>"></i>
+                  <%= payment.status || 'inconnu' %>
+                </span>
               </td>
               <td><%= helpers.dateTime(updatedAt) %></td>
             </tr>
@@ -86,41 +118,57 @@
   <article class="panel panel-note">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Repere</p>
-        <h3>Comment lire les montants</h3>
+        <p class="eyebrow">Lecture rapide</p>
+        <h3>Repères</h3>
       </div>
     </div>
     <div class="note-stack">
       <div class="note-card">
-        <strong>CA confirme</strong>
+        <strong>CA confirmé</strong>
         <p>Somme des transactions en statut <code>approved</code> ou <code>transferred</code>.</p>
       </div>
       <div class="note-card">
-        <strong>Montant transfere</strong>
-        <p>Somme des transactions deja passees en statut <code>transferred</code>.</p>
+        <strong>Montant transféré</strong>
+        <p>Paiements déjà passés en <code>transferred</code>.</p>
       </div>
       <div class="note-card">
-        <strong>Source de verite</strong>
-        <p>Le backend conserve maintenant un historique local de chaque transaction par <code>transaction_id</code>.</p>
+        <strong>Source de vérité</strong>
+        <p>Le backend consolide l’init, la vérification et le webhook dans <code>payments</code>.</p>
       </div>
     </div>
   </article>
 </section>
 
-<section class="panel">
+<section class="panel panel-payments-activations">
   <div class="section-head">
     <div>
-      <p class="eyebrow">Activations recentes</p>
-      <h3>Derniers abonnements actives</h3>
+      <p class="eyebrow">Activations récentes</p>
+      <h3>Derniers comptes premium</h3>
     </div>
   </div>
-  <div class="table-wrap">
+
+  <div class="table-wrap payments-activations-wrap">
     <table>
-      <thead><tr><th>Utilisateur</th><th>Classe</th><th>Date debut</th><th>Date fin</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Utilisateur</th>
+          <th>Classe</th>
+          <th>Date début</th>
+          <th>Date fin</th>
+        </tr>
+      </thead>
       <tbody>
-        <% if (!data.recentSubscriptions.length) { %><tr><td colspan="4">Aucune activation enregistree.</td></tr><% } %>
+        <% if (!data.recentSubscriptions.length) { %><tr><td colspan="4">Aucune activation enregistrée.</td></tr><% } %>
         <% data.recentSubscriptions.forEach((user) => { %>
-          <tr><td><strong><%= `${user.prenoms} ${user.nom}` %></strong><small><%= user.email %></small></td><td><%= user.classe %></td><td><%= helpers.dateTime(user.subscription_date) %></td><td><%= helpers.dateTime(user.subscription_expiry) %></td></tr>
+          <tr>
+            <td>
+              <strong><%= `${user.prenoms} ${user.nom}` %></strong>
+              <small><%= user.email || 'Contact non renseigné' %></small>
+            </td>
+            <td><%= user.classe || 'Classe non renseignée' %></td>
+            <td><%= helpers.dateTime(user.subscription_date) %></td>
+            <td><%= helpers.dateTime(user.subscription_expiry) %></td>
+          </tr>
         <% }) %>
       </tbody>
     </table>

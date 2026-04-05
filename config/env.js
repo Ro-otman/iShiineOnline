@@ -53,4 +53,5 @@ export const env = {
   ADMIN_DASHBOARD_USER: process.env.ADMIN_DASHBOARD_USER || '',
   ADMIN_DASHBOARD_PASSWORD: process.env.ADMIN_DASHBOARD_PASSWORD || '',
   ADMIN_DASHBOARD_TITLE: process.env.ADMIN_DASHBOARD_TITLE || 'iShiine Admin',
+  APP_TIMEZONE: process.env.APP_TIMEZONE || 'Africa/Porto-Novo',
 };

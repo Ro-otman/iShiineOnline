@@ -1,0 +1,18 @@
+<%- include('partials/layout-start') %>
+
+<section class="panel admin-error-panel">
+  <div class="admin-error-wrap">
+    <span class="admin-error-mark"><i class='bx bx-error-circle'></i></span>
+    <div class="admin-error-copy">
+      <p class="eyebrow">Erreur <%= errorStatus %></p>
+      <h3><%= errorTitle %></h3>
+      <p><%= errorMessage %></p>
+    </div>
+    <div class="admin-error-actions">
+      <a href="javascript:window.location.reload()" class="primary-button"><i class='bx bx-refresh'></i> Réessayer</a>
+      <a href="/admin" class="ghost-link"><i class='bx bx-left-arrow-alt'></i> Retour au tableau de bord</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/layout-end') %>

@@ -1,45 +1,40 @@
 ﻿<%- include('partials/layout-start') %>
 
 <section class="content-grid-2 content-layout">
-  <article class="panel form-panel">
-    <div class="section-head">
+  <article class="panel form-panel ligue-form-panel">
+    <div class="section-head ligue-section-head">
       <div>
-        <p class="eyebrow">Reglages</p>
-        <h3><%= data.editingSetting ? 'Modifier un reglage de ligue' : 'Configurer la ligue' %></h3>
+        <p class="eyebrow"><i class='bx bx-sliders'></i> Réglages</p>
+        <h3><i class='bx bx-calendar-event'></i> <%= data.editingSetting ? 'Modifier un réglage de ligue' : 'Configurer la ligue' %></h3>
       </div>
-      <span class="soft-badge"><%= helpers.number(data.settings.length) %> configuration(s)</span>
+      <span class="soft-badge"><i class='bx bx-layer'></i> <%= helpers.number(data.settings.length) %> configuration(s)</span>
     </div>
 
     <% if (data.editingSetting) { %>
-      <div class="mini-row">
+      <div class="mini-row ligue-edit-note">
         <div>
-          <strong>Edition en cours</strong>
+          <strong><i class='bx bx-edit-alt'></i> Édition en cours</strong>
           <small><%= `${data.editingSetting.nom_classe} / ${data.editingSetting.nom_type}` %></small>
         </div>
-        <a href="/admin/ligue" class="ghost-link">Nouveau reglage</a>
+        <a href="/admin/ligue" class="ghost-link"><i class='bx bx-plus'></i> Nouveau réglage</a>
       </div>
     <% } %>
-
-    <p>
-      Le temps de chaque question est porte par le quiz lui-meme via <code>timer_seconds</code>.
-      Ici, tu regles seulement le debut des sessions, le volume par matiere, la marge et la pause.
-    </p>
 
     <form method="post" action="/admin/ligue/settings" class="quiz-form">
       <input type="hidden" name="edit_setting_id" value="<%= form.edit_setting_id || '' %>" />
       <div class="form-split">
-        <label>
-          <span>Classe</span>
+        <label class="ligue-field">
+          <span class="field-label"><i class='bx bx-building-house'></i> Classe</span>
           <select name="id_classe" required>
-            <option value="">Selectionner une classe</option>
+            <option value="">Sélectionner une classe</option>
             <% data.classes.forEach((classe) => { %>
               <option value="<%= classe.id_classe %>" <%= String(form.id_classe || '') === String(classe.id_classe) ? 'selected' : '' %>><%= classe.nom_classe %></option>
             <% }) %>
           </select>
         </label>
 
-        <label>
-          <span>Type de serie</span>
+        <label class="ligue-field">
+          <span class="field-label"><i class='bx bx-category-alt'></i> Type de série</span>
           <select name="id_type">
             <option value="" <%= !String(form.id_type || '') ? 'selected' : '' %>>Commun</option>
             <% data.typeSeries.forEach((type) => { %>
@@ -50,88 +45,71 @@
       </div>
 
       <div class="form-split form-split-large">
-        <label>
-          <span>Debut de session</span>
+        <label class="ligue-field">
+          <span class="field-label"><i class='bx bx-time-five'></i> Début de session (heure du Bénin)</span>
           <input type="datetime-local" name="starts_at" value="<%= form.starts_at || '' %>" required />
         </label>
-        <label>
-          <span>Questions par matiere</span>
+        <label class="ligue-field">
+          <span class="field-label"><i class='bx bx-list-ol'></i> Questions par matière</span>
           <input type="number" name="questions_per_subject" min="1" max="200" step="1" value="<%= form.questions_per_subject || '10' %>" required />
         </label>
       </div>
 
       <div class="form-split">
-        <label>
-          <span>Marge technique (secondes)</span>
+        <label class="ligue-field">
+          <span class="field-label"><i class='bx bx-stopwatch'></i> Marge technique (secondes)</span>
           <input type="number" name="margin_seconds" min="0" max="3600" step="5" value="<%= form.margin_seconds || '15' %>" required />
         </label>
-        <label>
-          <span>Pause entre matieres (minutes)</span>
+        <label class="ligue-field">
+          <span class="field-label"><i class='bx bx-pause-circle'></i> Pause entre matières (minutes)</span>
           <input type="number" name="break_minutes" min="0" max="720" step="1" value="<%= form.break_minutes || '5' %>" required />
         </label>
       </div>
 
-      <button type="submit" class="primary-button"><%= data.editingSetting ? 'Mettre a jour les reglages' : 'Enregistrer les reglages' %></button>
+      <button type="submit" class="primary-button"><i class='bx bx-save'></i> <%= data.editingSetting ? 'Mettre à jour les réglages' : 'Enregistrer les réglages' %></button>
     </form>
   </article>
 
-  <div class="panel-stack">
-    <article class="panel">
-      <div class="section-head">
+  <div class="panel-stack ligue-side-stack">
+    <article class="panel panel-ligue-guide">
+      <div class="section-head ligue-section-head ligue-guide-head">
         <div>
-          <p class="eyebrow">Repere</p>
-          <h3>Ce que controle ce module</h3>
+          <p class="eyebrow"><i class='bx bx-compass'></i> Repère</p>
+          <h3 class="ligue-guide-title"><i class='bx bx-info-circle'></i> Ce que contrôle ce module</h3>
         </div>
       </div>
-      <div class="mini-list">
-        <div class="mini-row">
+      <div class="mini-list ligue-guide-list">
+        <div class="mini-row ligue-guide-row">
+          <span class="ligue-guide-icon ligue-guide-icon-sky"><i class='bx bx-timer'></i></span>
           <div>
             <strong>Temps par question</strong>
             <small>Vient de chaque quiz via <code>timer_seconds</code>.</small>
           </div>
         </div>
-        <div class="mini-row">
+        <div class="mini-row ligue-guide-row">
+          <span class="ligue-guide-icon ligue-guide-icon-mint"><i class='bx bx-task'></i></span>
           <div>
-            <strong>Volume de la matiere</strong>
-            <small><%= helpers.number(Number(form.questions_per_subject || 10)) %> question(s) seront tirees pour la session cible.</small>
+            <strong>Volume de la matière</strong>
+            <small><%= helpers.number(Number(form.questions_per_subject || 10)) %> question(s) seront tirées pour la session cible.</small>
           </div>
         </div>
-        <div class="mini-row">
+        <div class="mini-row ligue-guide-row">
+          <span class="ligue-guide-icon ligue-guide-icon-gold"><i class='bx bx-git-branch'></i></span>
           <div>
             <strong>Pause et marge</strong>
-            <small>La marge est technique. La pause est appliquee entre deux matieres.</small>
+            <small>La marge est technique. La pause est appliquée entre deux matières.</small>
           </div>
         </div>
       </div>
-    </article>
-
-    <article class="panel">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Derniere configuration</p>
-          <h3>Etat actuel</h3>
-        </div>
-      </div>
-      <% const latest = data.settings[0]; %>
-      <% if (!latest) { %>
-        <p class="empty-copy">Aucun reglage de ligue n a encore ete enregistre.</p>
-      <% } else { %>
-        <div class="mini-list">
-          <div class="mini-row"><div><strong><%= latest.nom_classe %> / <%= latest.nom_type %></strong><small>Mise a jour: <%= helpers.dateTime(latest.updated_at) %></small></div></div>
-          <div class="mini-row"><div><strong>Debut</strong><small><%= helpers.dateTime(latest.starts_at) %></small></div></div>
-          <div class="mini-row"><div><strong>Questions par matiere</strong><small><%= helpers.number(latest.questions_per_subject) %></small></div></div>
-          <div class="mini-row"><div><strong>Marge / Pause</strong><small><%= helpers.number(latest.margin_seconds) %> sec / <%= helpers.number(latest.break_minutes) %> min</small></div></div>
-        </div>
-      <% } %>
     </article>
   </div>
 </section>
 
 <section class="panel">
-  <div class="section-head">
+  <div class="section-head ligue-section-head">
     <div>
-      <p class="eyebrow">Configurations</p>
-      <h3>Reglages enregistres</h3>
+      <p class="eyebrow"><i class='bx bx-collection'></i> Configurations</p>
+      <h3><i class='bx bx-data'></i> Réglages enregistrés</h3>
     </div>
   </div>
   <div class="table-wrap">
@@ -140,17 +118,17 @@
         <tr>
           <th>Classe</th>
           <th>Type</th>
-          <th>Debut</th>
-          <th>Questions / matiere</th>
+          <th>Début</th>
+          <th>Questions / matière</th>
           <th>Marge</th>
           <th>Pause</th>
-          <th>Mise a jour</th>
+          <th>Mise à jour</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <% if (!data.settings.length) { %>
-          <tr><td colspan="8">Aucun reglage de ligue disponible pour le moment.</td></tr>
+          <tr><td colspan="8">Aucun réglage de ligue disponible pour le moment.</td></tr>
         <% } %>
         <% data.settings.forEach((setting) => { %>
           <tr>
@@ -161,7 +139,7 @@
             <td><%= helpers.number(setting.margin_seconds) %> sec</td>
             <td><%= helpers.number(setting.break_minutes) %> min</td>
             <td><%= helpers.dateTime(setting.updated_at) %></td>
-            <td><a href="/admin/ligue?edit=<%= setting.id_setting %>" class="ghost-link">Modifier</a></td>
+            <td><a href="/admin/ligue?edit=<%= setting.id_setting %>" class="ghost-link"><i class='bx bx-pencil'></i> Modifier</a></td>
           </tr>
         <% }) %>
       </tbody>

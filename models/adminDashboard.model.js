@@ -2,6 +2,10 @@
 import { execute, getPool } from '../config/db.js';
 import { getPaymentsDashboardData } from './payments.model.js';
 import { ensureSaReleaseScheduleForSa } from './saReleaseSchedule.model.js';
+import {
+  formatDateTimeLocalInputValue,
+  normalizeDateTimeLocalToUtcSql,
+} from '../utils/dateTime.js';
 
 function asInt(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? ''), 10);
@@ -67,33 +71,6 @@ function normalizeOptionalInt(value) {
   return parsed;
 }
 
-function normalizeDateTimeLocal(value) {
-  const raw = String(value ?? '').trim();
-  if (!raw) {
-    const err = new Error('Selectionne la date et l heure de debut.');
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const normalized = raw.replace(' ', 'T');
-  const matches = normalized.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
-  if (!matches) {
-    const err = new Error('Le format de debut est invalide.');
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const [, year, month, day, hours, minutes, seconds = '00'] = matches;
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-function toDateTimeLocalValue(value) {
-  const raw = String(value ?? '').trim();
-  if (!raw) return '';
-  const normalized = raw.replace(' ', 'T');
-  return normalized.length >= 16 ? normalized.slice(0, 16) : normalized;
-}
-
 function currentIso() {
   return new Date().toISOString();
 }
@@ -108,7 +85,7 @@ function buildLigueDefaults(setting) {
     edit_setting_id: setting?.id_setting ? String(setting.id_setting) : '',
     id_classe: setting?.id_classe ? String(setting.id_classe) : '',
     id_type: setting?.id_type ? String(setting.id_type) : '',
-    starts_at: toDateTimeLocalValue(setting?.starts_at),
+    starts_at: formatDateTimeLocalInputValue(setting?.starts_at),
     questions_per_subject: String(setting?.questions_per_subject ?? 10),
     margin_seconds: String(setting?.margin_seconds ?? 15),
     break_minutes: String(setting?.break_minutes ?? 5),
@@ -318,10 +295,25 @@ async function getAdminLigueSettingById(idSetting) {
 }
 
 export async function getAdminOverviewPageData() {
-  const [base, recentUsers, classBreakdown, subjectBreakdown, recentQuizzes] = await Promise.all([
-    getMetricsBundle(), listRecentUsers(6), listClassBreakdown(6), listSubjectBreakdown(6), listRecentQuizzes(8),
+  const [base, recentUsers, classBreakdown, subjectBreakdown, recentQuizzes, recentSubscriptions, paymentData] = await Promise.all([
+    getMetricsBundle(),
+    listRecentUsers(6),
+    listClassBreakdown(6),
+    listSubjectBreakdown(6),
+    listRecentQuizzes(8),
+    listRecentSubscriptions(8),
+    getPaymentsDashboardData(8),
   ]);
-  return { ...base, recentUsers, classBreakdown, subjectBreakdown, recentQuizzes };
+  return {
+    ...base,
+    recentUsers,
+    classBreakdown,
+    subjectBreakdown,
+    recentQuizzes,
+    recentSubscriptions,
+    paymentMetrics: paymentData.metrics,
+    recentPayments: paymentData.recentPayments,
+  };
 }
 
 export async function getAdminUsersPageData() {
@@ -465,7 +457,7 @@ export async function createQuizFromDashboard(input) {
 export async function saveLigueSettingsFromDashboard(input) {
   const idClasse = normalizePositiveInt(input.id_classe, 'La classe', { min: 1, max: 9999 });
   const idType = normalizeOptionalInt(input.id_type);
-  const startsAt = normalizeDateTimeLocal(input.starts_at);
+  const startsAt = normalizeDateTimeLocalToUtcSql(input.starts_at);
   const questionsPerSubject = normalizePositiveInt(input.questions_per_subject, 'Le nombre de questions par matiere', { min: 1, max: 200 });
   const marginSeconds = normalizePositiveInt(input.margin_seconds, 'La marge technique', { min: 0, max: 3600 });
   const breakMinutes = normalizePositiveInt(input.break_minutes, 'La pause entre matieres', { min: 0, max: 720 });

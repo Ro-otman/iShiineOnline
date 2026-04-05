@@ -1,36 +1,70 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= `${page.title} | ${appTitle}` %></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+    />
     <link rel="stylesheet" href="/admin.css" />
   </head>
-  <body class="admin-body">
+  <body class="admin-body admin-loading">
+    <div class="admin-site-loader" id="adminSiteLoader" aria-hidden="false">
+      <div class="admin-site-loader__veil"></div>
+      <div class="admin-site-loader__card">
+        <div class="admin-site-loader__brand">
+          <span class="admin-site-loader__mark"><i class="bx bxs-graduation"></i></span>
+          <div class="admin-site-loader__copy">
+            <span class="admin-site-loader__eyebrow">iShiine Admin</span>
+            <strong>Chargement en cours</strong>
+            <small>Préparation de l’espace de pilotage…</small>
+          </div>
+        </div>
+        <div class="admin-site-loader__motion" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="admin-site-loader__rail" aria-hidden="true">
+          <span></span>
+        </div>
+      </div>
+    </div>
     <% const navItems = [
-      { key: 'overview', href: '/admin', label: 'Vue d ensemble', hint: 'KPIs + activite' },
-      { key: 'users', href: '/admin/users', label: 'Utilisateurs', hint: 'Comptes + abonnements' },
-      { key: 'content', href: '/admin/content', label: 'Contenu', hint: 'Programmes + quiz' },
-      { key: 'ligue', href: '/admin/ligue', label: 'Ligue', hint: 'Planning + reglages' },
-      { key: 'payments', href: '/admin/payments', label: 'Paiements', hint: 'Revenu + activations' },
+      { key: 'overview', href: '/admin', label: 'Vue globale', hint: 'Revenus, activité, contenu', icon: 'bx-grid-alt' },
+      { key: 'users', href: '/admin/users', label: 'Utilisateurs', hint: 'Comptes et abonnements', icon: 'bx-group' },
+      { key: 'content', href: '/admin/content', label: 'Contenu', hint: 'Programmes, SA, quiz', icon: 'bx-book-content' },
+      { key: 'ligue', href: '/admin/ligue', label: 'Ligue', hint: 'Planning et réglages', icon: 'bx-timer' },
+      { key: 'payments', href: '/admin/payments', label: 'Transactions', hint: 'Journal FedaPay', icon: 'bx-credit-card-front' },
     ]; %>
 
     <div class="admin-app">
       <aside class="admin-sidebar">
         <div class="brand-card">
-          <div class="brand-orb"></div>
-          <div>
-            <p class="brand-kicker">iShiine</p>
-            <h1><%= appTitle %></h1>
-            <p class="brand-copy">Le cockpit clair, pro et vivant pour piloter l application.</p>
+          <div class="brand-topline">
+            <div class="brand-lockup">
+              <span class="brand-mark"><i class="bx bxs-graduation"></i></span>
+              <div class="brand-texts">
+                <span class="brand-tag">iShiine admin</span>
+                <h1><%= appTitle %></h1>
+              </div>
+            </div>
           </div>
         </div>
 
         <nav class="side-nav">
-          <% navItems.forEach((item, index) => { %>
+          <% navItems.forEach((item) => { %>
             <a href="<%= item.href %>" class="side-link <%= page.section === item.key ? 'side-link-active' : '' %>">
-              <span class="side-link-index">0<%= index + 1 %></span>
-              <span>
+              <span class="side-link-icon"><i class="bx <%= item.icon %>"></i></span>
+              <span class="side-link-copy">
                 <strong><%= item.label %></strong>
                 <small><%= item.hint %></small>
               </span>
@@ -38,38 +72,39 @@
           <% }) %>
         </nav>
 
-        <div class="sidebar-mini-stats">
-          <article class="mini-stat-card">
-            <span>Utilisateurs</span>
-            <strong><%= helpers.number(data.metrics.totalUsers) %></strong>
-          </article>
-          <article class="mini-stat-card accent">
-            <span>Abonnes actifs</span>
-            <strong><%= helpers.number(data.metrics.activeSubscribers) %></strong>
-          </article>
-          <article class="mini-stat-card gold">
-            <span>Quiz</span>
-            <strong><%= helpers.number(data.metrics.totalQuiz) %></strong>
-          </article>
-        </div>
       </aside>
 
       <main class="admin-main">
-        <header class="page-header">
-          <div>
-            <p class="page-kicker"><%= page.kicker %></p>
-            <h2><%= page.title %></h2>
-            <p class="page-intro"><%= page.intro %></p>
-          </div>
+        <header class="page-header <%= page.hideHeading === true ? 'page-header-compact' : '' %>">
+          <% if (page.hideHeading !== true) { %>
+            <div class="page-heading">
+              <p class="page-kicker"><%= page.kicker %></p>
+              <h2><%= page.title %></h2>
+              <p class="page-intro"><%= page.intro %></p>
+            </div>
+          <% } %>
+
           <div class="page-meta">
-            <span class="meta-chip">Mise a jour: <%= helpers.dateTime(data.generatedAt) %></span>
-            <span class="meta-chip meta-chip-accent">Plan premium: <%= helpers.money(data.premiumAmount) %> F CFA</span>
+            <span class="meta-chip">
+              <i class="bx bx-time-five"></i>
+              Mise à jour <%= helpers.dateTime(data.generatedAt) %>
+            </span>
+            <span class="meta-chip meta-chip-accent">
+              <i class="bx bx-diamond"></i>
+              Plan premium <%= helpers.money(data.premiumAmount) %> F CFA
+            </span>
           </div>
         </header>
 
         <% if (feedback.success) { %>
-          <div class="flash flash-success"><%= feedback.success %></div>
+          <div class="flash flash-success">
+            <i class="bx bxs-check-circle"></i>
+            <span><%= feedback.success %></span>
+          </div>
         <% } %>
         <% if (feedback.error) { %>
-          <div class="flash flash-error"><%= feedback.error %></div>
+          <div class="flash flash-error">
+            <i class="bx bxs-error-circle"></i>
+            <span><%= feedback.error %></span>
+          </div>
         <% } %>

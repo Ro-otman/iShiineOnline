@@ -8,6 +8,7 @@ import {
   getAdminUsersPageData,
   saveLigueSettingsFromDashboard,
 } from '../models/adminDashboard.model.js';
+import { formatDateTimeForDisplay } from '../utils/dateTime.js';
 
 function normalizeForm(body = {}) {
   return {
@@ -38,6 +39,14 @@ function normalizeLeagueSettingsForm(body = {}) {
   };
 }
 
+function getSafeFeedbackMessage(error, fallbackMessage) {
+  const statusCode = Number(error?.statusCode) || 500;
+  if (statusCode >= 400 && statusCode < 500 && error?.message) {
+    return String(error.message).trim();
+  }
+  return fallbackMessage;
+}
+
 function buildHelpers() {
   return {
     number(value) {
@@ -47,13 +56,10 @@ function buildHelpers() {
       return new Intl.NumberFormat('fr-FR').format(Number(value || 0));
     },
     dateTime(value) {
-      if (!value) return 'Non renseigne';
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return String(value);
-      return date.toLocaleString('fr-FR');
+      return formatDateTimeForDisplay(value);
     },
     date(value) {
-      if (!value) return 'Non renseigne';
+      if (!value) return 'Non renseigné';
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return String(value);
       return date.toLocaleDateString('fr-FR');
@@ -82,9 +88,10 @@ export async function renderAdminOverview(req, res, next) {
       view: 'overview',
       page: {
         section: 'overview',
-        title: 'Vue d ensemble',
-        kicker: 'Pilotage global',
-        intro: 'Un panorama clair de l application avec les indicateurs qui comptent vraiment.',
+        title: 'Vue globale',
+        kicker: 'Tableau de bord',
+        intro: 'Les chiffres essentiels d’iShiine, en une seule vue.',
+        hideHeading: true,
       },
       data,
       feedback: { success: req.query?.success, error: req.query?.error },
@@ -103,7 +110,7 @@ export async function renderAdminUsers(req, res, next) {
         section: 'users',
         title: 'Utilisateurs',
         kicker: 'Population',
-        intro: 'Suis la croissance de ta communaute, les abonnements et les classes les plus actives.',
+        intro: 'Comptes, abonnements et classes les plus actives.',
       },
       data,
     });
@@ -119,9 +126,9 @@ export async function renderAdminContent(req, res, next) {
       view: 'content',
       page: {
         section: 'content',
-        title: 'Contenu pedagogique',
-        kicker: 'Creation',
-        intro: 'Ajoute de nouveaux quiz, garde un oeil sur les programmes et les matieres les plus fournies.',
+        title: 'Contenu pédagogique',
+        kicker: 'Création',
+        intro: 'Ajout de quiz, programmes et matières.',
       },
       data,
       feedback: { success: req.query?.success, error: req.query?.error },
@@ -142,9 +149,9 @@ export async function renderAdminLigue(req, res, next) {
       view: 'ligue',
       page: {
         section: 'ligue',
-        title: 'Reglages de ligue',
+        title: 'Réglages de ligue',
         kicker: 'Planning',
-        intro: 'Regle les sessions par classe et type de serie. Le temps des questions vient maintenant directement des quiz.',
+        intro: '',
       },
       data,
       feedback: { success: req.query?.success, error: req.query?.error },
@@ -162,9 +169,9 @@ export async function renderAdminPayments(req, res, next) {
       view: 'payments',
       page: {
         section: 'payments',
-        title: 'Paiements et revenus',
-        kicker: 'Monetisation',
-        intro: 'Une lecture propre des abonnements et du revenu estime, prete a accueillir la vraie synchronisation FedaPay.',
+        title: '',
+        kicker: 'Monétisation',
+        intro: '',
       },
       data,
     });
@@ -177,7 +184,7 @@ export async function createAdminQuiz(req, res, next) {
   const form = normalizeForm(req.body);
   try {
     const created = await createQuizFromDashboard(form);
-    const success = encodeURIComponent(`Quiz ajoute avec succes (#${created.id_quiz}).`);
+    const success = encodeURIComponent(`Quiz ajouté avec succès (#${created.id_quiz}).`);
     return res.redirect(`/admin/content?success=${success}`);
   } catch (error) {
     try {
@@ -188,11 +195,11 @@ export async function createAdminQuiz(req, res, next) {
         page: {
           section: 'content',
           title: 'Contenu pedagogique',
-          kicker: 'Creation',
-          intro: 'Ajoute de nouveaux quiz, garde un oeil sur les programmes et les matieres les plus fournies.',
+          kicker: 'Création',
+          intro: 'Ajoute de nouveaux quiz, garde un oeil sur les programmes et les matières les plus fournies.',
         },
         data,
-        feedback: { error: error?.message || 'Impossible d ajouter le quiz pour le moment.' },
+        feedback: { error: getSafeFeedbackMessage(error, "Impossible d'ajouter le quiz pour le moment.") },
         form,
       });
     } catch (renderError) {
@@ -206,7 +213,7 @@ export async function saveAdminLigueSettings(req, res, next) {
   try {
     const saved = await saveLigueSettingsFromDashboard(form);
     const target = `${saved.nom_classe} / ${saved.nom_type}`;
-    const success = encodeURIComponent(`Reglages de ligue enregistres pour ${target}.`);
+    const success = encodeURIComponent(`Réglages de ligue enregistrés pour ${target}.`);
     return res.redirect(`/admin/ligue?success=${success}`);
   } catch (error) {
     try {
@@ -219,12 +226,12 @@ export async function saveAdminLigueSettings(req, res, next) {
         view: 'ligue',
         page: {
           section: 'ligue',
-          title: 'Reglages de ligue',
+          title: 'Réglages de ligue',
           kicker: 'Planning',
-          intro: 'Regle les sessions par classe et type de serie. Le temps des questions vient maintenant directement des quiz.',
+          intro: 'Règle les sessions par classe et type de série. Le temps des questions vient maintenant directement des quiz.',
         },
         data,
-        feedback: { error: error?.message || 'Impossible d enregistrer ces reglages pour le moment.' },
+        feedback: { error: getSafeFeedbackMessage(error, "Impossible d'enregistrer ces réglages pour le moment.") },
         form,
       });
     } catch (renderError) {
