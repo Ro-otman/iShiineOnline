@@ -56,7 +56,7 @@ async function start() {
 
   app.use(express.static(path.join(__dirname, "public")));
 
-  app.get("/", (_req, res) => res.redirect("/health"));
+  app.get("/", (_req, res) => res.redirect("/admin"));
   app.use("/admin", adminRouter);
   app.use("/api", routes);
   app.use("/", routes);
@@ -108,3 +108,4 @@ start().catch((err) => {
   });
   process.exit(1);
 });
+
