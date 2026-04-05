@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 
 import {
   createAdminQuiz,
@@ -9,9 +9,19 @@ import {
   renderAdminUsers,
   saveAdminLigueSettings,
 } from '../controllers/admin.controller.js';
-import { requireAdminDashboardAuth } from '../middlewares/adminAuth.js';
+import {
+  loginAdmin,
+  logoutAdmin,
+  renderAdminLogin,
+} from '../controllers/adminAuth.controller.js';
+import { redirectAuthenticatedAdmin, requireAdminDashboardAuth } from '../middlewares/adminAuth.js';
 
 const router = Router();
+
+router.get('/login', redirectAuthenticatedAdmin, renderAdminLogin);
+router.post('/auth/login', loginAdmin);
+router.get('/logout', logoutAdmin);
+router.post('/auth/logout', logoutAdmin);
 
 router.use(requireAdminDashboardAuth);
 router.get('/', renderAdminOverview);

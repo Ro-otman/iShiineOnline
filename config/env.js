@@ -50,8 +50,13 @@ export const env = {
   PAYMENT_DURATION_DAYS: toInt(process.env.PAYMENT_DURATION_DAYS, 30),
 
   // Admin dashboard
-  ADMIN_DASHBOARD_USER: process.env.ADMIN_DASHBOARD_USER || '',
-  ADMIN_DASHBOARD_PASSWORD: process.env.ADMIN_DASHBOARD_PASSWORD || '',
   ADMIN_DASHBOARD_TITLE: process.env.ADMIN_DASHBOARD_TITLE || 'iShiine Admin',
+  ADMIN_ACCESS_TOKEN_SECRET:
+    process.env.ADMIN_ACCESS_TOKEN_SECRET ||
+    (process.env.NODE_ENV === 'production' ? '' : 'dev-admin-access-secret-change-me'),
+  ADMIN_ACCESS_TOKEN_TTL_MINUTES: toInt(process.env.ADMIN_ACCESS_TOKEN_TTL_MINUTES, 15),
+  ADMIN_REFRESH_TOKEN_TTL_DAYS: toInt(process.env.ADMIN_REFRESH_TOKEN_TTL_DAYS, 30),
+  ADMIN_COOKIE_SECURE: toBool(process.env.ADMIN_COOKIE_SECURE, process.env.NODE_ENV === 'production'),
+  ADMIN_COOKIE_DOMAIN: process.env.ADMIN_COOKIE_DOMAIN || '',
   APP_TIMEZONE: process.env.APP_TIMEZONE || 'Africa/Porto-Novo',
 };

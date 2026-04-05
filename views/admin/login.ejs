@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion admin | <%= appTitle %></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+    />
+    <link rel="stylesheet" href="/admin.css" />
+  </head>
+  <body class="admin-body admin-login-body admin-loading">
+    <div class="admin-site-loader" id="adminSiteLoader" aria-hidden="false">
+      <div class="admin-site-loader__veil"></div>
+      <div class="admin-site-loader__card">
+        <div class="admin-site-loader__brand">
+          <span class="admin-site-loader__mark"><i class="bx bxs-graduation"></i></span>
+          <div class="admin-site-loader__copy">
+            <span class="admin-site-loader__eyebrow">iShiine Admin</span>
+            <strong>Chargement en cours</strong>
+            <small>Préparation de l’espace sécurisé…</small>
+          </div>
+        </div>
+        <div class="admin-site-loader__motion" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="admin-site-loader__rail" aria-hidden="true">
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <main class="admin-login-shell">
+      <section class="admin-login-card">
+        <div class="admin-login-brand">
+          <span class="admin-login-mark"><i class='bx bxs-lock-alt'></i></span>
+          <div>
+            <p class="eyebrow"><i class='bx bx-shield-quarter'></i> Accès admin</p>
+            <h1><%= appTitle %></h1>
+            <p>Connecte-toi avec la clé d’accès administrateur pour piloter le back-office.</p>
+          </div>
+        </div>
+
+        <% if (feedback.success) { %>
+          <div class="flash flash-success">
+            <i class="bx bxs-check-circle"></i>
+            <span><%= feedback.success %></span>
+          </div>
+        <% } %>
+
+        <% if (feedback.error) { %>
+          <div class="flash flash-error">
+            <i class="bx bxs-error-circle"></i>
+            <span><%= feedback.error %></span>
+          </div>
+        <% } %>
+
+        <form method="post" action="/admin/auth/login" class="admin-login-form">
+          <input type="hidden" name="return_to" value="<%= form.returnTo %>" />
+
+          <label class="content-field">
+            <span class="content-field-label"><i class='bx bx-key'></i> Clé d’accès</span>
+            <input
+              type="password"
+              name="access_key"
+              value="<%= form.accessKey %>"
+              placeholder="Saisis la clé d’accès admin"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+
+          <button type="submit" class="primary-button admin-login-button">
+            <i class='bx bx-log-in-circle'></i>
+            Ouvrir l’espace admin
+          </button>
+        </form>
+      </section>
+    </main>
+
+    <script src="/admin-loader.js" defer></script>
+  </body>
+</html>
