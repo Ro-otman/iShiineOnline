@@ -2128,34 +2128,33 @@ body.admin-body.admin-loaded .admin-site-loader {
 }
 
 
-.side-logout-form {
-  margin-top: auto;
+.header-logout-form {
+  display: inline-flex;
 }
 
-.side-logout-button {
-  width: 100%;
-  border: 0;
+.header-logout-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(225, 99, 118, 0.16);
+  border-radius: 999px;
   cursor: pointer;
-  text-align: left;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 12px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f8fbff;
-  transition: background 0.2s ease, transform 0.2s ease;
+  justify-content: center;
+  background: rgba(255, 240, 243, 0.9);
+  color: var(--coral);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.side-logout-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+.header-logout-button:hover {
   transform: translateY(-1px);
+  background: rgba(255, 232, 237, 0.96);
+  border-color: rgba(225, 99, 118, 0.24);
 }
 
-.side-logout-button .side-link-copy strong,
-.side-logout-button .side-link-copy small {
-  display: block;
-  color: inherit;
+.header-logout-button i {
+  font-size: 18px;
 }
 
 .admin-login-body {
