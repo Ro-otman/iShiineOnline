@@ -153,16 +153,14 @@ export async function startWhiteExamRun(req, res, next) {
     const subjectId = asInt(req.params?.subjectId);
     const classe = asString(req.query?.classe).trim();
     const requestedWeekKey = asString(req.query?.weekKey).trim();
-    const userId = asString(
-      req.body?.userId ?? req.body?.id_user ?? req.body?.id_users,
-    ).trim();
+    const userId = asString(req.user?.idUser).trim();
 
     if (!subjectId || !classe || !userId) {
       return res.status(400).json({
         ok: false,
         error: {
           code: 'BAD_REQUEST',
-          message: 'Champs requis: subjectId, userId + query ?classe=',
+          message: 'Champs requis: subjectId + query ?classe=',
         },
       });
     }
@@ -299,15 +297,13 @@ export async function startWhiteExamRun(req, res, next) {
 export async function submitWhiteExamRun(req, res, next) {
   try {
     const runId = asString(req.params?.runId).trim();
-    const userId = asString(
-      req.body?.userId ?? req.body?.id_user ?? req.body?.id_users,
-    ).trim();
+    const userId = asString(req.user?.idUser).trim();
     const answers = Array.isArray(req.body?.answers) ? req.body.answers : [];
 
     if (!runId || !userId) {
       return res.status(400).json({
         ok: false,
-        error: { code: 'BAD_REQUEST', message: 'Champs requis: runId + userId' },
+        error: { code: 'BAD_REQUEST', message: 'Champs requis: runId' },
       });
     }
 

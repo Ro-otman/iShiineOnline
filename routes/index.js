@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import authRouter from './auth.routes.js';
 import checkoutRouter from './checkout.routes.js';
 import healthRouter from './health.routes.js';
 import ligueRouter from './ligue.routes.js';
@@ -9,6 +10,7 @@ import versionRouter from './version.routes.js';
 
 const router = Router();
 
+router.use('/auth', authRouter);
 router.use('/health', healthRouter);
 router.use('/version', versionRouter);
 router.use('/ligue', ligueRouter);

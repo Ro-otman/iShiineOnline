@@ -11,6 +11,7 @@ import {
 import { getLigueQuizPayloadByIds } from '../models/quiz.model.js';
 import { resolveLigueRoomContext } from '../services/ligueRoomContext.service.js';
 import { computeQuestionWindow } from '../services/ligueSchedule.service.js';
+import { verifyUserAccessToken } from '../services/userJwt.service.js';
 
 const runtimeByRoomKey = new Map();
 const roomMembershipBySocketId = new Map();
@@ -24,6 +25,16 @@ function asString(value) {
 
 function compositeRoomKey(roomId, classe) {
   return `${asString(classe).trim()}::${asString(roomId).trim()}`;
+}
+
+function resolveSocketUser(payload) {
+  const token = asString(payload?.accessToken || payload?.token).trim();
+  if (!token) {
+    const error = new Error('Connexion utilisateur requise.');
+    error.code = 'USER_AUTH_REQUIRED';
+    throw error;
+  }
+  return verifyUserAccessToken(token);
 }
 
 function roomChannel(roomKey) {
@@ -310,9 +321,11 @@ export function registerLigueSockets(io) {
   io.on('connection', (socket) => {
     socket.on('ligue:join', async (payload, ack) => {
       try {
+        const session = resolveSocketUser(payload);
         const roomId = asString(payload?.roomId).trim();
         const classe = asString(payload?.classe).trim();
-        const userId = asString(payload?.userId).trim();
+        const requestedUserId = asString(payload?.userId).trim();
+        const userId = session.idUser;
         const fullName = asString(payload?.fullName).trim();
         const photoUrl = payload?.photoUrl ? asString(payload.photoUrl).trim() : null;
 
@@ -321,7 +334,17 @@ export function registerLigueSockets(io) {
             ok: false,
             error: {
               code: 'BAD_REQUEST',
-              message: 'roomId, classe, userId et fullName requis',
+              message: 'roomId, classe et fullName requis',
+            },
+          });
+        }
+
+        if (requestedUserId && requestedUserId !== userId) {
+          return ack?.({
+            ok: false,
+            error: {
+              code: 'USER_ID_MISMATCH',
+              message: 'Session utilisateur invalide pour cette salle.',
             },
           });
         }
@@ -363,17 +386,29 @@ export function registerLigueSockets(io) {
 
     socket.on('ligue:run_join', async (payload, ack) => {
       try {
+        const session = resolveSocketUser(payload);
         const runId = asString(payload?.runId).trim();
         const roomId = asString(payload?.roomId).trim();
         const classe = asString(payload?.classe).trim();
-        const userId = asString(payload?.userId).trim();
+        const requestedUserId = asString(payload?.userId).trim();
+        const userId = session.idUser;
 
         if (!runId || !roomId || !classe || !userId) {
           return ack?.({
             ok: false,
             error: {
               code: 'BAD_REQUEST',
-              message: 'runId, roomId, classe et userId requis',
+              message: 'runId, roomId et classe requis',
+            },
+          });
+        }
+
+        if (requestedUserId && requestedUserId !== userId) {
+          return ack?.({
+            ok: false,
+            error: {
+              code: 'USER_ID_MISMATCH',
+              message: 'Session utilisateur invalide pour ce run.',
             },
           });
         }

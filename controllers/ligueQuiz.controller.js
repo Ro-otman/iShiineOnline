@@ -91,14 +91,14 @@ export async function startSubjectRun(req, res, next) {
     const devBypass = asString(req.query?.dev).trim() === '1';
 
     const body = req.body || {};
-    const userId = asString(body.userId || body.id_user || body.id_users).trim();
+    const userId = asString(req.user?.idUser).trim();
 
     if (!roomId || !classe || !subjectId || !userId) {
       return res.status(400).json({
         ok: false,
         error: {
           code: 'BAD_REQUEST',
-          message: 'Champs requis: roomId, subjectId, userId + query ?classe=',
+          message: 'Champs requis: roomId, subjectId + query ?classe=',
         },
       });
     }
@@ -336,13 +336,13 @@ export async function submitRun(req, res, next) {
     const runId = asString(req.params?.runId).trim();
     const body = req.body || {};
 
-    const userId = asString(body.userId || body.id_user || body.id_users).trim();
+    const userId = asString(req.user?.idUser).trim();
     const answers = Array.isArray(body.answers) ? body.answers : [];
 
     if (!runId || !userId) {
       return res.status(400).json({
         ok: false,
-        error: { code: 'BAD_REQUEST', message: 'Champs requis: runId + userId' },
+        error: { code: 'BAD_REQUEST', message: 'Champs requis: runId' },
       });
     }
 

@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     const ext = path.extname(file.originalname || '').toLowerCase();
     const safeExt = ['.jpg', '.jpeg', '.png', '.webp'].includes(ext) ? ext : '';
 
-    const id = req.body?.id_users || req.body?.id_user;
+    const id = req.user?.idUser || req.body?.id_users || req.body?.id_user;
     const safePrefix = id ? String(id).replaceAll(/[^a-zA-Z0-9_-]/g, '').slice(0, 32) : 'user';
 
     cb(null, `${safePrefix}_${Date.now()}_${crypto.randomUUID()}${safeExt}`);

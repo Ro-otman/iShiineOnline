@@ -112,3 +112,24 @@ export async function upsertUser(user) {
 
   return getUserById(user.id_users);
 }
+
+export async function upsertUserProfile(user) {
+  const safeUserId = String(user?.id_users ?? '').trim();
+  if (!safeUserId) return null;
+
+  const existing = await getUserById(safeUserId);
+  return upsertUser({
+    id_users: safeUserId,
+    nom: user.nom,
+    prenoms: user.prenoms,
+    email: user.email,
+    classe: user.classe,
+    phone: user.phone,
+    img_path: user.img_path ?? existing?.img_path ?? null,
+    is_subscribed: Number(existing?.is_subscribed ?? user?.is_subscribed ?? 0) ? 1 : 0,
+    subscription_date: existing?.subscription_date ?? user?.subscription_date ?? null,
+    subscription_expiry:
+      existing?.subscription_expiry ?? user?.subscription_expiry ?? null,
+    first_use_time: existing?.first_use_time ?? user?.first_use_time ?? null,
+  });
+}

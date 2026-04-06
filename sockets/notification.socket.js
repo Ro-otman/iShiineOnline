@@ -1,8 +1,19 @@
 import { getUserChannel } from '../services/realtimeGateway.service.js';
+import { verifyUserAccessToken } from '../services/userJwt.service.js';
 
 function asString(value) {
   if (value === undefined || value === null) return '';
   return String(value).trim();
+}
+
+function resolveSocketUser(payload) {
+  const token = asString(payload?.accessToken || payload?.token);
+  if (!token) {
+    const error = new Error('Connexion utilisateur requise.');
+    error.code = 'USER_AUTH_REQUIRED';
+    throw error;
+  }
+  return verifyUserAccessToken(token);
 }
 
 export function registerNotificationSockets(io) {
@@ -10,24 +21,37 @@ export function registerNotificationSockets(io) {
     let activeUserId = null;
 
     socket.on('notifications:subscribe', (payload, ack) => {
-      const userId = asString(payload?.userId);
-      if (!userId) {
+      try {
+        const session = resolveSocketUser(payload);
+        const requestedUserId = asString(payload?.userId);
+        const userId = session.idUser;
+
+        if (requestedUserId && requestedUserId !== userId) {
+          return ack?.({
+            ok: false,
+            error: {
+              code: 'USER_ID_MISMATCH',
+              message: 'Session utilisateur invalide pour cet abonnement.',
+            },
+          });
+        }
+
+        if (activeUserId && activeUserId !== userId) {
+          socket.leave(getUserChannel(activeUserId));
+        }
+
+        activeUserId = userId;
+        socket.join(getUserChannel(userId));
+        return ack?.({ ok: true, userId });
+      } catch (error) {
         return ack?.({
           ok: false,
           error: {
-            code: 'BAD_REQUEST',
-            message: 'userId requis.',
+            code: error?.code || 'USER_AUTH_REQUIRED',
+            message: error?.message || 'Connexion utilisateur requise.',
           },
         });
       }
-
-      if (activeUserId && activeUserId !== userId) {
-        socket.leave(getUserChannel(activeUserId));
-      }
-
-      activeUserId = userId;
-      socket.join(getUserChannel(userId));
-      return ack?.({ ok: true, userId });
     });
 
     socket.on('notifications:unsubscribe', (_payload, ack) => {

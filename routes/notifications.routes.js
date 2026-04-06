@@ -7,9 +7,11 @@ import {
   registerDevice,
   unregisterDevice,
 } from '../controllers/notifications.controller.js';
+import { requireUserAuth } from '../middlewares/userAuth.js';
 
 const router = Router();
 
+router.use(requireUserAuth);
 router.get('/', listNotifications);
 router.post('/devices/register', registerDevice);
 router.post('/devices/unregister', unregisterDevice);

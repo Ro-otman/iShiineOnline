@@ -84,13 +84,13 @@ function serializeChallenge(challenge) {
 
 export async function listChallenges(req, res, next) {
   try {
-    const userId = asString(req.query?.userId);
+    const userId = asString(req.user?.idUser);
     if (!userId) {
-      return res.status(400).json({
+      return res.status(401).json({
         ok: false,
         error: {
-          code: 'BAD_REQUEST',
-          message: 'Parametre userId requis.',
+          code: 'USER_AUTH_REQUIRED',
+          message: 'Connexion utilisateur requise.',
         },
       });
     }
@@ -111,7 +111,7 @@ export async function listChallenges(req, res, next) {
 export async function postChallengeComment(req, res, next) {
   try {
     const idChallenge = Number(req.params?.challengeId);
-    const userId = asString(req.body?.userId);
+    const userId = asString(req.user?.idUser);
     const authorName = asString(req.body?.authorName);
     const text = asString(req.body?.text);
     const verifiedBlue = asBool(req.body?.verifiedBlue);
@@ -128,7 +128,7 @@ export async function postChallengeComment(req, res, next) {
         ok: false,
         error: {
           code: 'BAD_REQUEST',
-          message: 'Champs requis: userId, authorName, text.',
+          message: 'Champs requis: authorName, text.',
         },
       });
     }
@@ -161,7 +161,7 @@ export async function postChallengeComment(req, res, next) {
 export async function toggleLikeOnChallenge(req, res, next) {
   try {
     const idChallenge = Number(req.params?.challengeId);
-    const userId = asString(req.body?.userId);
+    const userId = asString(req.user?.idUser);
 
     if (!Number.isFinite(idChallenge) || idChallenge <= 0) {
       return res.status(400).json({
@@ -173,7 +173,10 @@ export async function toggleLikeOnChallenge(req, res, next) {
     if (!userId) {
       return res.status(400).json({
         ok: false,
-        error: { code: 'BAD_REQUEST', message: 'userId requis.' },
+        error: {
+          code: 'USER_AUTH_REQUIRED',
+          message: 'Connexion utilisateur requise.',
+        },
       });
     }
 
@@ -199,7 +202,7 @@ export async function toggleLikeOnChallenge(req, res, next) {
 export async function saveChallengeSubmission(req, res, next) {
   try {
     const idChallenge = Number(req.params?.challengeId);
-    const userId = asString(req.body?.userId);
+    const userId = asString(req.user?.idUser);
     const weekKey = sanitizeWeekKey(req.body?.weekKey);
     const answerText = asString(req.body?.answer);
     const status = asString(req.body?.status).toLowerCase() === 'completed'
@@ -218,7 +221,7 @@ export async function saveChallengeSubmission(req, res, next) {
         ok: false,
         error: {
           code: 'BAD_REQUEST',
-          message: 'Champs requis: userId, answer.',
+          message: 'Champs requis: answer.',
         },
       });
     }

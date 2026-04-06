@@ -49,6 +49,14 @@ export const env = {
   PAYMENT_CURRENCY_ISO: process.env.PAYMENT_CURRENCY_ISO || 'XOF',
   PAYMENT_DURATION_DAYS: toInt(process.env.PAYMENT_DURATION_DAYS, 30),
 
+  // Mobile user auth
+  USER_ACCESS_TOKEN_SECRET:
+    process.env.USER_ACCESS_TOKEN_SECRET ||
+    (process.env.NODE_ENV === 'production'
+      ? ''
+      : 'dev-user-access-secret-change-me'),
+  USER_ACCESS_TOKEN_TTL_DAYS: toInt(process.env.USER_ACCESS_TOKEN_TTL_DAYS, 180),
+
   // Admin dashboard
   ADMIN_DASHBOARD_TITLE: process.env.ADMIN_DASHBOARD_TITLE || 'iShiine Admin',
   ADMIN_ACCESS_TOKEN_SECRET:

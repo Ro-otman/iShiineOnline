@@ -8,7 +8,7 @@ import {
   getUserById,
   getUserByIdentity,
   rekeyUserId,
-  upsertUser,
+  upsertUserProfile,
 } from '../models/users.model.js';
 
 function asString(value) {
@@ -59,8 +59,7 @@ export async function registerToLigue(req, res, next) {
   try {
     const body = req.body || {};
 
-    const requestedUserId =
-      asString(body.id_users || body.id_user).trim() || crypto.randomUUID();
+    const requestedUserId = asString(req.user?.idUser).trim();
     const nom = asString(body.nom).trim();
     const prenoms = asString(body.prenoms).trim();
     const email = asString(body.email).trim();
@@ -87,18 +86,19 @@ export async function registerToLigue(req, res, next) {
     const img_path = req.file ? `/uploads/users/${req.file.filename}` : null;
 
     let id_users = requestedUserId;
-    const existingUserById = await getUserById(id_users);
-    if (!existingUserById) {
+    let persistedUser = await getUserById(id_users);
+    if (!persistedUser) {
       const matchedUser = await getUserByIdentity({ email, phone });
       if (matchedUser?.id_users && matchedUser.id_users !== id_users) {
         await rekeyUserId({
           fromUserId: matchedUser.id_users,
           toUserId: id_users,
         });
+        persistedUser = await getUserById(id_users);
       }
     }
 
-    const user = await upsertUser({
+    const user = await upsertUserProfile({
       id_users,
       nom,
       prenoms,
@@ -106,16 +106,18 @@ export async function registerToLigue(req, res, next) {
       classe,
       phone,
       img_path,
-      is_subscribed: Number(body.is_subscribed ?? 0) ? 1 : 0,
-      subscription_date: body.subscription_date
-        ? asString(body.subscription_date)
+      is_subscribed: Number(persistedUser?.is_subscribed ?? 0) ? 1 : 0,
+      subscription_date: persistedUser?.subscription_date
+        ? asString(persistedUser.subscription_date)
         : null,
-      subscription_expiry: body.subscription_expiry
-        ? asString(body.subscription_expiry)
+      subscription_expiry: persistedUser?.subscription_expiry
+        ? asString(persistedUser.subscription_expiry)
         : null,
       first_use_time: body.first_use_time
         ? asString(body.first_use_time)
-        : null,
+        : (persistedUser?.first_use_time
+          ? asString(persistedUser.first_use_time)
+          : null),
     });
 
     const existingProfile = await getLigueProfileByUserId(id_users);
@@ -164,11 +166,19 @@ export async function registerToLigue(req, res, next) {
 
 export async function getLigueProfile(req, res, next) {
   try {
-    const userId = asString(req.params?.userId).trim();
+    const requestedUserId = asString(req.params?.userId).trim();
+    const userId = asString(req.user?.idUser || requestedUserId).trim();
     if (!userId) {
       return res.status(400).json({
         ok: false,
         error: { code: 'BAD_REQUEST', message: 'userId requis' },
+      });
+    }
+
+    if (requestedUserId && requestedUserId !== userId) {
+      return res.status(403).json({
+        ok: false,
+        error: { code: 'FORBIDDEN', message: 'Profil non autorisé.' },
       });
     }
 

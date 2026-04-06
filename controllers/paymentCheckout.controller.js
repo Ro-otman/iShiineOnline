@@ -12,7 +12,7 @@ export async function initPaymentCheckout(req, res, next) {
     const body = asObject(req.body);
     const checkout = await createPaymentCheckout({
       req,
-      userId: body.userId || body.id_user || body.id_users,
+      userId: req.user?.idUser,
       plan: body.plan,
       customer: asObject(body.customer),
     });
@@ -33,7 +33,7 @@ export async function verifyPaymentCheckout(req, res, next) {
   try {
     const body = asObject(req.body);
     const result = await verifyPaymentCheckoutService({
-      userId: body.userId || body.id_user || body.id_users,
+      userId: req.user?.idUser,
       callbackUrl: body.callbackUrl,
       query: asObject(body.query),
       transactionId: body.transactionId,

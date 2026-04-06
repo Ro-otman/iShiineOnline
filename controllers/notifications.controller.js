@@ -35,17 +35,11 @@ function buildError(message, statusCode = 400, code = 'BAD_REQUEST') {
   return error;
 }
 
-function resolveUserId(source = {}) {
-  return asString(
-    source.userId || source.id_user || source.id_users || source.user_id,
-  );
-}
-
 export async function listNotifications(req, res, next) {
   try {
-    const userId = resolveUserId(req.query);
+    const userId = asString(req.user?.idUser);
     if (!userId) {
-      throw buildError('userId requis.', 400, 'USER_ID_REQUIRED');
+      throw buildError('Connexion utilisateur requise.', 401, 'USER_AUTH_REQUIRED');
     }
 
     const notifications = await listUserNotifications({
@@ -67,10 +61,10 @@ export async function listNotifications(req, res, next) {
 export async function registerDevice(req, res, next) {
   try {
     const body = req.body || {};
-    const userId = resolveUserId(body);
+    const userId = asString(req.user?.idUser);
     const fcmToken = asString(body.fcmToken || body.token || body.fcm_token);
     if (!userId || !fcmToken) {
-      throw buildError('userId et fcmToken requis.', 400, 'DEVICE_TOKEN_REQUIRED');
+      throw buildError('Connexion utilisateur et fcmToken requis.', 400, 'DEVICE_TOKEN_REQUIRED');
     }
 
     const device = await registerDevicePush({
@@ -111,9 +105,9 @@ export async function unregisterDevice(req, res, next) {
 
 export async function markNotificationAsRead(req, res, next) {
   try {
-    const userId = resolveUserId(req.body || {});
+    const userId = asString(req.user?.idUser);
     if (!userId) {
-      throw buildError('userId requis.', 400, 'USER_ID_REQUIRED');
+      throw buildError('Connexion utilisateur requise.', 401, 'USER_AUTH_REQUIRED');
     }
 
     const notification = await acknowledgeNotification({
@@ -132,9 +126,9 @@ export async function markNotificationAsRead(req, res, next) {
 
 export async function markAllNotificationsAsRead(req, res, next) {
   try {
-    const userId = resolveUserId(req.body || req.query || {});
+    const userId = asString(req.user?.idUser);
     if (!userId) {
-      throw buildError('userId requis.', 400, 'USER_ID_REQUIRED');
+      throw buildError('Connexion utilisateur requise.', 401, 'USER_AUTH_REQUIRED');
     }
 
     const result = await acknowledgeAllNotifications({ userId });
