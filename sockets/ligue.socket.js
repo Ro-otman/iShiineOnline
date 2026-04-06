@@ -54,7 +54,10 @@ async function emitRoomState(io, key, targetSocketId = null) {
   if (!runtime) return;
 
   try {
-    const context = await resolveRoomContext({ roomId: runtime.roomId, classe: runtime.classe });
+    const context = await resolveRoomContext({
+      roomId: runtime.roomId,
+      classe: runtime.classe,
+    });
     const payload = {
       roomId: runtime.roomId,
       classe: runtime.classe,
@@ -144,7 +147,11 @@ async function emitRunState(io, key, runId, targetSocketId = null) {
     const cache = await loadRunCache(runId);
     if (!cache) return;
 
-    const context = await resolveRoomContext({ roomId: runtime.roomId, classe: runtime.classe });
+    const context = await resolveRoomContext({
+      roomId: runtime.roomId,
+      classe: runtime.classe,
+      requestedWeekKey: cache.run.week_key,
+    });
     const totalQuestions = cache.questions.length;
     const slot = context.schedule.slots.find(
       (entry) => Number(entry.id_matiere) === Number(cache.run.id_matiere),

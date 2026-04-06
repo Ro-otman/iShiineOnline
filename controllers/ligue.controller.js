@@ -91,6 +91,7 @@ export async function getSubjects(req, res, next) {
 
     return res.json({
       ok: true,
+      weekKey: context.weekKey,
       classe: context.classRow.nom_classe,
       room: context.room,
       settings: {
