@@ -207,3 +207,83 @@ export async function getLigueQuizPayloadByIds(quizIds) {
     options: optionsByQuizId.get(quiz.id_quiz) ?? [],
   }));
 }
+
+export async function getSaContextById(id_sa) {
+  const safeIdSa = asInt(id_sa);
+  if (safeIdSa <= 0) return null;
+
+  const rows = await execute(
+    `
+      SELECT
+        s.id_sa,
+        s.nom_sa,
+        m.nom_matiere,
+        c.nom_classe,
+        c.id_classe,
+        COALESCE(ts.id_type, NULL) AS id_type,
+        COUNT(DISTINCT q.id_quiz) AS question_count
+      FROM sa s
+      JOIN programme p ON p.id_programme = s.id_programme
+      JOIN matieres m ON m.id_matiere = p.id_matiere
+      JOIN classes c ON c.id_classe = p.id_classe
+      LEFT JOIN type_series ts ON ts.id_type = p.id_type
+      LEFT JOIN quiz q ON q.id_sa = s.id_sa
+      WHERE s.id_sa = ?
+      GROUP BY s.id_sa, s.nom_sa, m.nom_matiere, c.nom_classe, c.id_classe, ts.id_type
+      LIMIT 1
+    `,
+    [safeIdSa],
+  );
+
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    id_sa: asInt(row.id_sa),
+    nom_sa: row.nom_sa,
+    nom_matiere: row.nom_matiere,
+    nom_classe: row.nom_classe,
+    id_classe: asInt(row.id_classe),
+    id_type: row.id_type == null ? null : asInt(row.id_type),
+    question_count: asInt(row.question_count),
+  };
+}
+
+export async function listQuizCandidatesForSa({
+  id_sa,
+  limit = null,
+  seed = '',
+}) {
+  const safeIdSa = asInt(id_sa);
+  if (safeIdSa <= 0) return [];
+
+  const safeSeed = String(seed ?? '').trim() || 'default';
+  const params = [safeIdSa];
+  let sql = `
+    SELECT
+      q.id_quiz,
+      COALESCE(NULLIF(qe.timer_seconds, 0), 30) AS timer_seconds
+    FROM quiz q
+    JOIN \`options\` o ON o.id_quiz = q.id_quiz
+    LEFT JOIN quiz_explanations qe ON qe.id_quiz = q.id_quiz
+    WHERE q.id_sa = ?
+    GROUP BY q.id_quiz, qe.timer_seconds
+    HAVING COUNT(DISTINCT o.id_options) >= 4
+       AND SUM(CASE WHEN o.is_correct = 1 THEN 1 ELSE 0 END) >= 1
+    ORDER BY SHA2(CONCAT(?, ':', q.id_quiz), 256) ASC, q.id_quiz ASC
+  `;
+  params.push(safeSeed);
+
+  if (limit != null) {
+    const safeLimit = Math.max(1, asInt(limit, 1));
+    sql += ' LIMIT ?';
+    params.push(safeLimit);
+  }
+
+  const rows = await execute(sql, params);
+  return rows
+    .map((row) => ({
+      id_quiz: asInt(row.id_quiz),
+      timer_seconds: normalizeTimerSeconds(row.timer_seconds),
+    }))
+    .filter((row) => row.id_quiz > 0);
+}

@@ -12,6 +12,9 @@ DROP TABLE IF EXISTS ligue_challenge_comments;
 DROP TABLE IF EXISTS ligue_challenge_likes;
 DROP TABLE IF EXISTS ligue_challenge_submissions;
 DROP TABLE IF EXISTS ligue_challenges;
+DROP TABLE IF EXISTS friend_duel_run_answers;
+DROP TABLE IF EXISTS friend_duel_runs;
+DROP TABLE IF EXISTS friend_duels;
 DROP TABLE IF EXISTS white_exam_run_answers;
 DROP TABLE IF EXISTS white_exam_run_questions;
 DROP TABLE IF EXISTS white_exam_runs;
@@ -971,6 +974,86 @@ CREATE TABLE white_exam_run_answers (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE friend_duels (
+  id_duel CHAR(36) PRIMARY KEY,
+  duel_code VARCHAR(48) NOT NULL,
+  id_user_creator VARCHAR(255) NOT NULL,
+  id_sa INT NOT NULL,
+  classe_label VARCHAR(120) NOT NULL,
+  subject_name VARCHAR(120) NOT NULL,
+  sa_name VARCHAR(255) NOT NULL,
+  timer_seconds INT NOT NULL DEFAULT 30,
+  question_count INT NOT NULL DEFAULT 0,
+  mode VARCHAR(32) NOT NULL DEFAULT 'exam',
+  quiz_ids_json LONGTEXT NOT NULL,
+  expires_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uq_friend_duels_code (duel_code),
+  KEY idx_friend_duels_creator (id_user_creator, created_at),
+  KEY idx_friend_duels_sa (id_sa),
+
+  CONSTRAINT fk_friend_duels_creator FOREIGN KEY (id_user_creator)
+    REFERENCES users(id_users)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_friend_duels_sa FOREIGN KEY (id_sa)
+    REFERENCES sa(id_sa)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE friend_duel_runs (
+  id_run CHAR(36) PRIMARY KEY,
+  id_duel CHAR(36) NOT NULL,
+  id_user VARCHAR(255) NOT NULL,
+  total_questions INT NOT NULL DEFAULT 0,
+  correct_count INT NOT NULL DEFAULT 0,
+  total_response_time_ms INT NOT NULL DEFAULT 0,
+  score_percent DOUBLE NOT NULL DEFAULT 0,
+  started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  submitted_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  KEY idx_friend_duel_runs_duel (id_duel, started_at),
+  KEY idx_friend_duel_runs_user (id_user, started_at),
+
+  CONSTRAINT fk_friend_duel_runs_duel FOREIGN KEY (id_duel)
+    REFERENCES friend_duels(id_duel)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_friend_duel_runs_user FOREIGN KEY (id_user)
+    REFERENCES users(id_users)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE friend_duel_run_answers (
+  id_run CHAR(36) NOT NULL,
+  id_quiz INT NOT NULL,
+  id_options INT NULL,
+  is_correct TINYINT(1) NOT NULL,
+  response_time_ms INT NULL,
+  answered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (id_run, id_quiz),
+  KEY idx_friend_duel_run_answers_quiz (id_quiz),
+
+  CONSTRAINT fk_friend_duel_run_answers_run FOREIGN KEY (id_run)
+    REFERENCES friend_duel_runs(id_run)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_friend_duel_run_answers_quiz FOREIGN KEY (id_quiz)
+    REFERENCES quiz(id_quiz)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_friend_duel_run_answers_option FOREIGN KEY (id_options)
+    REFERENCES `options`(id_options)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 

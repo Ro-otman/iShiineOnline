@@ -25,6 +25,13 @@ import {
   saveChallengeSubmission,
   toggleLikeOnChallenge,
 } from '../controllers/ligueChallenges.controller.js';
+import {
+  createDuelInvite,
+  getDuelInvite,
+  listMyDuels,
+  startDuelRun,
+  submitDuelRun,
+} from '../controllers/friendDuels.controller.js';
 import { uploadUserPhoto } from '../middlewares/uploadUserPhoto.js';
 import { requireUserAuth } from '../middlewares/userAuth.js';
 
@@ -42,6 +49,12 @@ router.get('/challenges', requireUserAuth, listChallenges);
 router.post('/challenges/:challengeId/comments', requireUserAuth, postChallengeComment);
 router.post('/challenges/:challengeId/likes/toggle', requireUserAuth, toggleLikeOnChallenge);
 router.post('/challenges/:challengeId/submission', requireUserAuth, saveChallengeSubmission);
+
+router.get('/duels/history', requireUserAuth, listMyDuels);
+router.post('/duels', requireUserAuth, createDuelInvite);
+router.post('/duels/runs/:runId/submit', requireUserAuth, submitDuelRun);
+router.get('/duels/:code', requireUserAuth, getDuelInvite);
+router.post('/duels/:code/run', requireUserAuth, startDuelRun);
 
 router.post('/rooms/:roomId/subjects/:subjectId/run', requireUserAuth, startSubjectRun);
 router.post('/runs/:runId/submit', requireUserAuth, submitRun);
