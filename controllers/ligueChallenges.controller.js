@@ -112,11 +112,17 @@ export async function listChallenges(req, res, next) {
     }
 
     const weekKey = sanitizeWeekKey(req.query?.weekKey);
-    const challenges = await listWeeklyChallenges({ weekKey, userId });
+    const includeInactive = asBool(req.query?.includeInactive);
+    const challenges = await listWeeklyChallenges({
+      weekKey,
+      userId,
+      includeInactive,
+    });
 
     return res.json({
       ok: true,
       weekKey,
+      includeInactive,
       challenges: challenges.map(serializeChallenge),
     });
   } catch (err) {

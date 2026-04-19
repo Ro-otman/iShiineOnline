@@ -4,7 +4,8 @@ function buildInClause(values) {
   return values.map(() => '?').join(', ');
 }
 
-export async function listWeeklyChallenges({ weekKey, userId }) {
+export async function listWeeklyChallenges({ weekKey, userId, includeInactive = false }) {
+  const activeClause = includeInactive ? '' : 'AND c.is_active = 1';
   const challenges = await execute(
     `
       SELECT
@@ -40,8 +41,8 @@ export async function listWeeklyChallenges({ weekKey, userId }) {
         ) AS liked_by_me
       FROM ligue_challenges c
       WHERE c.week_key = ?
-        AND c.is_active = 1
-      ORDER BY c.featured DESC, c.sort_order ASC, c.id_challenge ASC
+        ${activeClause}
+      ORDER BY c.is_active DESC, c.featured DESC, c.sort_order ASC, c.id_challenge ASC
     `,
     [userId, weekKey],
   );
