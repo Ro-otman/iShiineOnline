@@ -78,6 +78,7 @@ function serializeChallenge(challenge) {
   return {
     id_challenge: Number(challenge.id_challenge),
     week_key: asString(challenge.week_key),
+    is_active: Number(challenge.is_active ?? 0) === 1,
     title: asString(challenge.title),
     prompt: asString(challenge.prompt),
     subject: asString(challenge.subject),

@@ -11,6 +11,7 @@ export async function listWeeklyChallenges({ weekKey, userId, includeInactive = 
       SELECT
         c.id_challenge,
         c.week_key,
+        c.is_active,
         c.title,
         c.prompt,
         c.subject,
