@@ -5,6 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "notifications:prune-invalid-tokens": "node scripts/prune-invalid-push-tokens.mjs",
+    "postinstall": "node scripts/repair-fetch-blob.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
