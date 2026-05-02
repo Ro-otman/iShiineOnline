@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+﻿import crypto from 'node:crypto';
 
 import { env } from '../config/env.js';
 import { listLigueRecipientsForSetting, listUsersDueForReviewReminders, listUsersForCampaign, listUsersWithSubscriptionDates } from '../models/notificationAudience.model.js';
@@ -61,13 +61,13 @@ function buildReviewReminderCopy(user = {}) {
   const dueReviews = Math.max(1, Number(user?.due_reviews) || 0);
   if (dueReviews <= 1) {
     return {
-      title: 'iShiine \u2713 R\u00e9vision en attente',
+      title: 'iShiine \u{1F38A} R\u00e9vision en attente',
       message: "Tu as 1 r\u00e9vision \u00e0 reprendre. Ouvre iShiine d\u00e8s que tu es connect\u00e9 et garde le rythme.",
     };
   }
 
   return {
-    title: 'iShiine \u2713 R\u00e9visions en attente',
+    title: 'iShiine \u{1F38A} R\u00e9visions en attente',
     message: `Tu as ${dueReviews} r\u00e9visions \u00e0 reprendre. Ouvre iShiine d\u00e8s que tu es connect\u00e9 et garde le rythme.`,
   };
 }
@@ -296,3 +296,4 @@ export function startNotificationAutomation() {
 
   console.log(`[notifications] automation started (${Math.round(intervalMs / 1000)}s)`);
 }
+

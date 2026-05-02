@@ -153,7 +153,7 @@ export async function markAllNotificationsAsRead(req, res, next) {
 export async function sendAdminTestPushFromDashboard(req, res, next) {
   try {
     const body = req.body || {};
-    const title = asString(body.title) || 'iShiine \u2713 Test';
+    const title = asString(body.title) || 'iShiine \u{1F38A} Test';
     const message = asString(body.message) || 'Ceci est une notification de test envoyee depuis l\'admin.';
     const target = await getLatestAdminPushTarget();
     const userId = asString(body.userId || body.user_id || target?.id_user);
@@ -246,5 +246,6 @@ export async function runAdminNotificationJobs(req, res, next) {
     next(error);
   }
 }
+
 
 

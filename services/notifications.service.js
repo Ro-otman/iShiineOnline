@@ -1,4 +1,4 @@
-import {
+﻿import {
   createNotification,
   listNotificationsForUser,
   markAllNotificationsRead,
@@ -131,7 +131,7 @@ export async function notifyPaymentSuccess({
   const amountLabel = Number.isFinite(Number(amount)) ? formatNumberFr(amount) : null;
   const messageParts = [];
   if (amountLabel) {
-    messageParts.push(`Paiement confirmé : ${amountLabel} ${asString(currencyIso) || 'F CFA'}.`);
+    messageParts.push(`Paiement confirmÃ© : ${amountLabel} ${asString(currencyIso) || 'F CFA'}.`);
   }
   messageParts.push(
     expiryLabel
@@ -142,7 +142,7 @@ export async function notifyPaymentSuccess({
   return pushNotification({
     userId: safeUserId,
     category: 'success',
-    title: 'Abonnement activé',
+    title: 'Abonnement activÃ©',
     message: messageParts.join(' '),
     dedupeKey: `payment-success:${safeTransactionId}`,
     payload: {
@@ -173,7 +173,7 @@ export async function notifyLigueStart({
   return pushNotification({
     userId: safeUserId,
     category: 'info',
-    title: 'Début de ligue',
+    title: 'DÃ©but de ligue',
     message: startLabel
       ? `La ligue ${classLabel} commence maintenant. Bonne chance pour cette session du ${startLabel}.`
       : `La ligue ${classLabel} commence maintenant. Bonne chance.`,
@@ -208,7 +208,7 @@ export async function notifyLigueResult({
   return pushNotification({
     userId: safeUserId,
     category: roundedScore >= 50 ? 'success' : 'warning',
-    title: `iShiine \u2713 R\u00e9sultats ${asString(subjectName) || 'ligue'}`,
+    title: `iShiine \u{1F38A} R\u00e9sultats ${asString(subjectName) || 'ligue'}`,
     message: asString(subjectName)
       ? `R\u00e9sultats disponibles en ${asString(subjectName)} : ${roundedScore}% (${safeCorrectCount}/${safeTotalQuestions}).`
       : `Tes r\u00e9sultats sont disponibles : ${roundedScore}% (${safeCorrectCount}/${safeTotalQuestions}).`,
@@ -323,3 +323,4 @@ export async function notifyReviewCampaign({
     },
   });
 }
+
