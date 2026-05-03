@@ -222,6 +222,7 @@ export async function sendConnectivitySystemNotifications({
   trigger = 'online',
   now = new Date(),
   payload = {},
+  reviewSummary = null,
 } = {}) {
   const safeUserId = asString(userId);
   if (!safeUserId) {
@@ -236,10 +237,17 @@ export async function sendConnectivitySystemNotifications({
 
   if (env.REVIEW_REMINDER_ENABLED) {
     const minDueReviews = Math.max(1, env.REVIEW_REMINDER_MIN_DUE);
-    const reviewUser = await getUserDueForReviewReminder({
-      userId: safeUserId,
-      dueBefore: now.toISOString(),
-    });
+    const overrideDueReviews = Number(reviewSummary?.dueReviews) || 0;
+    const reviewUser = overrideDueReviews > 0
+      ? {
+          id_users: safeUserId,
+          due_reviews: overrideDueReviews,
+          next_review_at: asString(reviewSummary?.nextReviewAt),
+        }
+      : await getUserDueForReviewReminder({
+          userId: safeUserId,
+          dueBefore: now.toISOString(),
+        });
     const dueReviews = Number(reviewUser?.due_reviews) || 0;
 
     if (dueReviews >= minDueReviews) {

@@ -8,6 +8,7 @@ import {
   registerDevicePush,
   unregisterDevicePush,
 } from '../services/pushNotifications.service.js';
+import { syncReviewItemsForUser } from '../models/reviewItems.model.js';
 
 function asString(value) {
   if (value === undefined || value === null) return '';
@@ -26,6 +27,29 @@ function asInt(value, fallback = 20) {
   const parsed = Number.parseInt(asString(value), 10);
   if (!Number.isFinite(parsed)) return fallback;
   return parsed;
+}
+
+function asDate(value) {
+  const text = asString(value);
+  if (!text) return null;
+  const date = new Date(text);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function buildReviewSyncSummary(items = [], now = new Date()) {
+  const dueItems = [];
+  for (const item of items) {
+    const nextReviewAt = asDate(item?.nextReviewAt || item?.next_review_at);
+    if (nextReviewAt && nextReviewAt.getTime() <= now.getTime()) {
+      dueItems.push(nextReviewAt);
+    }
+  }
+
+  dueItems.sort((a, b) => a.getTime() - b.getTime());
+  return {
+    dueReviews: dueItems.length,
+    nextReviewAt: dueItems[0]?.toISOString() || '',
+  };
 }
 
 function buildError(message, statusCode = 400, code = 'BAD_REQUEST') {
@@ -122,6 +146,47 @@ export async function unregisterDevice(req, res, next) {
     res.json({
       ok: true,
       updatedCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function syncReviewItems(req, res, next) {
+  try {
+    const body = req.body || {};
+    const userId = asString(req.user?.idUser);
+    if (!userId) {
+      throw buildError('Connexion utilisateur requise.', 401, 'USER_AUTH_REQUIRED');
+    }
+
+    const rawItems = Array.isArray(body.items) ? body.items.slice(0, 1000) : [];
+    const reviewSummary = buildReviewSyncSummary(rawItems);
+    const sync = await syncReviewItemsForUser({
+      userId,
+      items: rawItems,
+      replace: body.replace !== false,
+    });
+
+    let systemNotifications = null;
+    try {
+      systemNotifications = await sendConnectivitySystemNotifications({
+        userId,
+        trigger: 'review_sync',
+        reviewSummary,
+      });
+    } catch (notificationError) {
+      console.error('[notifications] review sync automation failed', {
+        userId,
+        code: notificationError?.code,
+        message: notificationError?.message,
+      });
+    }
+
+    res.json({
+      ok: true,
+      sync,
+      systemNotifications,
     });
   } catch (error) {
     next(error);
